@@ -3,6 +3,7 @@ const app = express();
 const path = require("path");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
+const corsOptions = require("./config/corsOptions");
 const port = process.env.PORT || 4000;
 
 // custom middleware
@@ -17,32 +18,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Middleware to handle cors - cross origin resource sharing
-
-const whiteList = [
-  "https://localhost:3000",
-  "https://www.google.com",
-  "https://localhost:4000",
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (whiteList.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  optionsSuccessStatus: 200,
-};
-
 app.use(cors(corsOptions));
 
 // Middleware to handle static files
 app.use(express.static(path.join(__dirname, "/public")));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "index.html"));
-});
+app.use("/", require("./routes/root"));
+// app.use("/employees", require("./routes/api/employees"));
+app.use("/register", require("./routes/register"));
+app.use("/auth", require("./routes/auth"));
 
 // handle 404
 app.all("*", (req, res) => {
@@ -50,12 +34,10 @@ app.all("*", (req, res) => {
   if (req.accepts("html")) {
     res.sendFile(path.join(__dirname, "views", "404.html"));
     return;
-  }
-  else if (req.accepts("json")) {
+  } else if (req.accepts("json")) {
     res.json({ error: "Not found" });
     return;
-  }
-  else res.type("txt").send("Not found");
+  } else res.type("txt").send("Not found");
 });
 
 // handle errors
