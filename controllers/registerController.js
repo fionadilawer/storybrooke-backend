@@ -27,6 +27,7 @@ const handleNewUser = async (req, res) => {
     // create new suer
     const newUser = {
       username: user,
+      roles: { "User": 2001},
       password: hashedPwd,
     };
 

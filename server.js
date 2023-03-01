@@ -4,6 +4,9 @@ const path = require("path");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const corsOptions = require("./config/corsOptions");
+const verifyJWT = require("./middleware/verifyJWT");
+const cookieParser = require("cookie-parser");
+const credentials = require("./middleware/credentials");
 const port = process.env.PORT || 4000;
 
 // custom middleware
@@ -17,6 +20,12 @@ app.use(express.urlencoded({ extended: false }));
 // Middleware to handle json data
 app.use(express.json());
 
+// Middleware to handle cookies
+app.use(cookieParser());
+
+// handle credentials
+app.use(credentials);
+
 // Middleware to handle cors - cross origin resource sharing
 app.use(cors(corsOptions));
 
@@ -24,9 +33,15 @@ app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, "/public")));
 
 app.use("/", require("./routes/root"));
-// app.use("/employees", require("./routes/api/employees"));
 app.use("/register", require("./routes/register"));
 app.use("/auth", require("./routes/auth"));
+app.use("/refresh", require("./routes/refresh"));
+app.use("/logout", require("./routes/logout"));
+
+// verify JWT
+app.use(verifyJWT);
+app.use("/employees", require("./routes/api/employees"));
+
 
 // handle 404
 app.all("*", (req, res) => {
