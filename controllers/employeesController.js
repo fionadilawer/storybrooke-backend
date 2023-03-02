@@ -5,11 +5,14 @@ const data = {
   },
 };
 
+const fsPromises = require("fs").promises;
+const path = require("path");
+
 const getAllEmployees = (req, res) => {
   res.json(data.employees);
 };
 
-const createNewEmployee = (req, res) => {
+const createNewEmployee = async (req, res) => {
   const newEmployee = {
     id: data.employees[data.employees.length - 1].id + 1 || 1,
     firstname: req.body.firstname,
@@ -23,7 +26,11 @@ const createNewEmployee = (req, res) => {
   }
 
   data.setEmployees([...data.employees, newEmployee]);
-  res.status(201).json(data.employees)
+  await fsPromises.writeFile(
+    path.join(__dirname, "..", "model", "employees.json"),
+    JSON.stringify(data.employees)
+  );
+  res.status(201).json(data.employees);
 };
 
 const updateEmployee = (req, res) => {
@@ -33,10 +40,17 @@ const updateEmployee = (req, res) => {
   });
 };
 
-const deleteEmployee = (req, res) => {
+const deleteEmployee = async (req, res) => {
   res.json({
     id: req.body.id,
   });
+  data.setEmployees(
+    data.employees.filter((employee) => employee.id !== req.body.id)
+  )
+  await fsPromises.writeFile(
+    path.join(__dirname, "..", "model", "employees.json"),
+    JSON.stringify(data.employees)
+  );
 };
 
 const getEmployee = (req, res) => {
