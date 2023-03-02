@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -41,7 +42,6 @@ app.use("/logout", require("./routes/logout"));
 // verify JWT
 app.use(verifyJWT);
 app.use("/employees", require("./routes/api/employees"));
-
 
 // handle 404
 app.all("*", (req, res) => {
