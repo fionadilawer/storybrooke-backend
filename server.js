@@ -3,12 +3,17 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const errorHandler = require("./middleware/errorHandler");
 const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
+const connectDB = require("./config/dbConn");
 const port = process.env.PORT || 4000;
+
+// connect to MongoDB
+connectDB();
 
 // custom middleware
 app.use((req, res, next) => {
@@ -42,6 +47,7 @@ app.use("/logout", require("./routes/logout"));
 // verify JWT
 app.use(verifyJWT);
 app.use("/employees", require("./routes/api/employees"));
+app.use("/users", require("./routes/api/users"));
 
 // handle 404
 app.all("*", (req, res) => {
@@ -58,6 +64,9 @@ app.all("*", (req, res) => {
 // handle errors
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB");
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
 });
