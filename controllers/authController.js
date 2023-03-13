@@ -13,11 +13,11 @@ const handleLogin = async (req, res) => {
       .json({ message: "Username and password are required" });
   // check if user exists
   const foundUser = await User.findOne({ username: user }).exec();
-  if (!foundUser) return res.sendStatus(401); // unauthorized
+  if (!foundUser) return res.sendStatus(404); // not found
   // check if password is correct
   const isMatch = await bcrypt.compare(pwd, foundUser.password);
   if (isMatch) {
-    const roles = Object.values(foundUser.roles);
+    const roles = Object.values(foundUser.roles).filter(Boolean);
     // create JWTs
     const accessToken = jwt.sign(
       {
@@ -27,7 +27,7 @@ const handleLogin = async (req, res) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
+      { expiresIn: "5m" }
     );
     // refresh token
     const refreshToken = jwt.sign(
@@ -46,7 +46,7 @@ const handleLogin = async (req, res) => {
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    res.json({ accessToken });
+    res.json({ roles, accessToken });
   } else {
     res.sendStatus(401); // unauthorized
   }
