@@ -14,7 +14,7 @@ const handleRefreshToken = async (req, res) => {
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
     if (err || foundUser.username !== decoded.username)
       return res.sendStatus(403); // forbidden
-    const roles = Object.values(foundUser.roles);
+    const roles = Object.values(foundUser.roles).filter(Boolean);
     // create new jwt
     const accessToken = jwt.sign(
       {
@@ -24,10 +24,10 @@ const handleRefreshToken = async (req, res) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
+      { expiresIn: "5m" }
     );
     // send new jwt
-    res.json({ accessToken });
+    res.json({ roles, accessToken });
     console.log("new access token sent")
   });
 };
