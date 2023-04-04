@@ -14,6 +14,10 @@ const UserSchema = new Schema({
     Editor: Number,
     Admin: Number,
   },
+  interests: {
+    type: Array,
+    default: [],
+  },
   password: {
     type: String,
     required: true,
