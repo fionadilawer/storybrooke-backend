@@ -49,6 +49,7 @@ app.use("/logout", require("./routes/logout"));
 app.use(verifyJWT);
 app.use("/employees", require("./routes/api/employees"));
 app.use("/users", require("./routes/api/users"));
+app.use("/", require("./routes/interest"));
 
 // handle 404
 app.all("*", (req, res) => {

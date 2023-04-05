@@ -23,6 +23,7 @@ const updateUser = async (req, res) => {
   if (req?.body?.user) user.username = req.body.user;
   if (req?.body?.roles) user.roles = req.body.roles;
   if (req?.body?.pwd) user.password = hashedPwd;
+  if (req?.body?.interests) user.interests = req.body.interests;
 
   try {
     const result = await user.save();
