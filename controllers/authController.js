@@ -12,7 +12,8 @@ const handleLogin = async (req, res) => {
       .status(400)
       .json({ message: "Username and password are required" });
   // check if user exists
-  const foundUser = await User.findOne({ username: user }).exec();
+  const foundUser = await User.findOne({ username: user.charAt(0).toUpperCase() + user.slice(1) }).exec();
+
   if (!foundUser) return res.sendStatus(404); // not found
   // check if password is correct
   const isMatch = await bcrypt.compare(pwd, foundUser.password);
@@ -36,7 +37,7 @@ const handleLogin = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "1d" }
     );
-// save refresh token with user in db
+    // save refresh token with user in db
     foundUser.refreshToken = refreshToken;
     const result = await foundUser.save();
     console.log(result);
