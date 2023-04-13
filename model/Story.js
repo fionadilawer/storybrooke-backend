@@ -16,11 +16,7 @@ const StorySchema = new Schema({
   },
   date: {
     type: Date,
-    default: Date.now,
-  },
-  time: {
-    type: String,
-    required: true,
+    default: new Date(),
   },
 });
 
