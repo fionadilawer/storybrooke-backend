@@ -14,6 +14,10 @@ const StorySchema = new Schema({
     type: String,
     required: true,
   },
+  genres: {
+    type: [String],
+    required: true,
+  },
   date: {
     type: Date,
     default: new Date(),
