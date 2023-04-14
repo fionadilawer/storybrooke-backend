@@ -53,7 +53,6 @@ app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
 app.use("/genre", require("./routes/api/stories"));
 
-
 // handle 404
 app.all("*", (req, res) => {
   res.status(404);
