@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Story = require("./Story");
 
 const GenreSchema = new Schema({
   genre: {
@@ -8,8 +9,8 @@ const GenreSchema = new Schema({
     unique: true,
   },
   stories: {
-    type: Array,
-    default: [],
+    type: [Story.schema],
+    required: true,
   },
 });
 
