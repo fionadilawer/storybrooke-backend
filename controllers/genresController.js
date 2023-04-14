@@ -35,12 +35,25 @@ const createNewGenre = async (req, res) => {
   if (!req.body.genre)
     return res.status(400).json({ message: "Genre is required." });
 
+  // check if genre already exists
+
+  const genre = await Genre.findOne({ genre: req.body.genre }).exec();
+
+  if (genre)
+    return res
+      .status(400)
+      .json({ message: `Genre ${req.body.genre} already exists.` });
+
   try {
     const result = await Genre.create({
-      genre: req.body.genre,
+      // capitalize first letter of genre
+      genre: req.body.genre.charAt(0).toUpperCase() + req.body.genre.slice(1),
     });
+    // fetch all genres and sort alphabetically
+    const genres = await Genre.find().sort({ genre: 1 });
+    res.status(201).json(genres);
 
-    res.status(201).json(result);
+    // res.status(201).json(result);
   } catch (err) {
     console.error(err);
   }
@@ -87,7 +100,10 @@ const deleteGenre = async (req, res) => {
 
   try {
     const result = await Genre.deleteOne({ _id: req.body.id });
-    res.status(200).json(result);
+    console.log(result);
+    res.status(200).json({
+      message: `Genre ${genre.genre} has been successfully deleted.`,
+    });
   } catch (err) {
     console.error(err);
   }
