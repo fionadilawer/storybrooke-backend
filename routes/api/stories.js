@@ -4,19 +4,31 @@ const ROLES_LIST = require("../../config/rolesList");
 const storyController = require("../../controllers/storyController");
 const verifyRoles = require("../../middleware/verifyRoles");
 
+// global routes
 router
-  .route("/:genre")
-  .get(storyController.getAllStories)
+  .route("/")
+  // .get(storyController.getAllStories)
   .post(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.createStory
   )
-    .put(
+  .delete(
+    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
+    storyController.deleteStory
+  )
+  .get(storyController.getAllStoriesGlobal);
+
+  router.route("/find").get(storyController.getStoryAllGenres);
+
+// specific genre
+router
+  .route("/:genre")
+  .get(storyController.getAllStories)
+  .put(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.updateStory
-    )
+  );
 
-router
-    .route("/:genre/find").get(storyController.getStory);
+router.route("/:genre/find").get(storyController.getStory);
 
 module.exports = router;
