@@ -1,8 +1,9 @@
 const Genre = require("../model/Genre");
 
-// create a story in a genre
+// create a story
 const createStory = async (req, res) => {
-  // create story
+  
+  // story object
   const story = {
     title: req.body.title,
     author: req.body.author,
@@ -11,75 +12,41 @@ const createStory = async (req, res) => {
     date: new Date(),
   };
 
+  // check if genre exists and update story by removing non-existent genres
+
+  for (let i = 0; i < story.genres.length; i++) {
+    const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
+    if (!genre) {
+      story.genres.splice(i, 1);
+      i--;
+      continue;
+    }
+  }
+
   //   find the genres and add the story to them
   for (let i = 0; i < req.body.genres.length; i++) {
-    // check if genre exists
+    // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-
-    // if genre doesn't exist, permanently remove it from the story
-    // while (!genre) {
-    //   story.genres.splice(i, 1);
-    //   i--;
-    //   continue;
-    // }
 
     // check if story exists in the genre
     if (genre.stories.find((story) => story.title === req.body.title)) continue;
+
     // push story to genre
     genre.stories.push(story);
-    // save genre
+
+    // save story in genre
     try {
       const result = await genre.save();
       console.log(result);
-      // res.status(201).json(result);
     } catch (err) {
       console.error(err);
     }
   }
-  // save genre
 
   res.status(201).json({
     message: `Story ${story.title} created in genres ${story.genres}.`,
   });
 };
-
-// const createStory = async (req, res) => {
-//     // check if genre exists
-//     const genre = await Genre.findOne({ genre: req.params.genre }).exec();
-
-//     if (!genre) {
-//       return res
-//         .status(404)
-//         .json({ message: `Genre ${req.params.genre} not found.` });
-//     }
-
-//     // check if story exists
-
-//     if (genre.stories.find((story) => story.title === req.body.title)) {
-//       return res
-//         .status(409)
-//         .json({ message: `Story ${req.body.title} already exists.` });
-//     }
-
-//     // create story
-//     const story = {
-//       title: req.body.title,
-//       author: req.body.author,
-//       body: req.body.body,
-//       date: new Date(),
-//     };
-
-//     // add story to genre
-//     genre.stories.push(story);
-
-//     // save genre
-//     try {
-//       const result = await genre.save();
-//       res.status(201).json(result);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
 
 // get all stories in a genre
 const getAllStories = async (req, res) => {
