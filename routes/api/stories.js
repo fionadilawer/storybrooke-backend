@@ -18,16 +18,19 @@ router
   )
   .get(storyController.getAllStoriesGlobal);
 
+router
+  .route("/:title")
+  .put(
+    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
+    storyController.updateStory
+  );
 router.route("/find").get(storyController.getStoryAllGenres);
 
 // specific genre
 router
   .route("/:genre")
   .get(storyController.getAllStories)
-  .put(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storyController.updateStory
-  )
+
   .delete(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.deleteStoryGenre
