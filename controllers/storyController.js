@@ -2,7 +2,6 @@ const Genre = require("../model/Genre");
 
 // create a story
 const createStory = async (req, res) => {
-  
   // story object
   const story = {
     title: req.body.title,
@@ -205,6 +204,69 @@ const deleteStory = async (req, res) => {
   res.status(200).json(result);
 };
 
+// delete a story in a specific genre
+const deleteStoryGenre = async (req, res) => {
+  // check if empty
+  if (!req.body.title)
+    return res.status(400).json({ message: "Title is required." });
+
+  // check if genre exists
+  const genre = await Genre.findOne({ genre: req.params.genre }).exec();
+
+  if (!genre) {
+    return res
+      .status(404)
+      .json({ message: `Genre ${req.params.genre} not found.` });
+  }
+
+  // check if story exists
+  const story = genre.stories.find((story) => story.title === req.body.title);
+
+  if (!story) {
+    return res
+      .status(404)
+      .json({ message: `Story ${req.body.title} not found.` });
+  }
+
+  // remove story from genre
+  const result = await Genre.updateOne(
+    { genre: req.params.genre },
+    { $pull: { stories: { title: req.body.title } } }
+  ).exec();
+
+  await Genre.updateMany(
+    { stories: { $elemMatch: { title: req.body.title } } },
+    { $pull: { genres: req.params.genre } }
+  ).exec();
+
+  res.status(200).json(result);
+
+  // remove genre from story
+
+  // check if story exists in any genre
+  const storyGenre = await Genre.findOne({
+    stories: { $elemMatch: { title: req.body.title } },
+  }).exec();
+
+  if (!storyGenre) return;
+
+  // await Genre.updateOne(
+  //   { stories: { $elemMatch: { title: req.body.title } } },
+  //   { $pull: { genres: req.params.genre } }
+  // ).exec();
+
+  // update story to remove genre from genres array in story object
+  const storyUpdate = storyGenre.stories.find(
+    (story) => story.title === req.body.title
+  );
+
+  storyUpdate.genres = storyUpdate.genres.filter(
+    (genre) => genre !== req.params.genre
+  );
+
+  await storyGenre.save();
+};
+
 module.exports = {
   createStory,
   getAllStories,
@@ -213,4 +275,5 @@ module.exports = {
   deleteStory,
   getStoryAllGenres,
   getAllStoriesGlobal,
+  deleteStoryGenre,
 };
