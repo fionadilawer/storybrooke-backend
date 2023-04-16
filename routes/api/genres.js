@@ -13,6 +13,8 @@ router
 router.route("/new").post(genresController.createNewGenre);
 router.route("/delete").delete(genresController.deleteGenre);
 
-router.route("/:id").get(genresController.getGenre);
+// router.route("/:id").get(genresController.getGenre);
+router.route("/find").get(genresController.getGenre);
+
 
 module.exports = router;
