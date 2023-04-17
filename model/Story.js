@@ -2,12 +2,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const StorySchema = new Schema({
-  // create the same id for one story
-  _id: {
-    type: String,
-    required: true,
-    default: new mongoose.Types.ObjectId().toHexString(),
-  },
   title: {
     type: String,
     required: true,
