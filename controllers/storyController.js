@@ -1,9 +1,11 @@
+const mongoose = require("mongoose");
 const Genre = require("../model/Genre");
 
 // create a story
 const createStory = async (req, res) => {
   // story object
   const story = {
+    _id: new mongoose.Types.ObjectId(),
     title: req.body.title,
     author: req.body.author,
     body: req.body.body,
@@ -37,13 +39,6 @@ const createStory = async (req, res) => {
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-
-    // check if story exists in the genre
-    // if (genre.stories.find((story) => story.body === req.body.body)) {
-    //   return res.status(400).json({
-    //     message: `The story you're trying to add already exists in this genre. Please come up with a new story.`,
-    //   });
-    // }
 
     // check if story title exists in the genre
     if (genre.stories.find((story) => story.title === req.body.title)) {
@@ -149,25 +144,25 @@ const getStoryAllGenres = async (req, res) => {
 // update a story globally
 const updateStory = async (req, res) => {
   // check if params are empty
-  if (!req.params.title)
-    return res.status(400).json({ message: "Story title is required." });
+  if (!req?.params?.id)
+    return res.status(400).json({ message: "Story ID is required." });
 
   // check if story exists in any genre in db
   const story = await Genre.findOne({
-    stories: { $elemMatch: { title: req.params.title } },
+    stories: { $elemMatch: { _id: req?.params?.id } },
   }).exec();
 
   // if story doesn't exist
   if (!story) {
     return res.status(404).json({
-      message: `Story ${req.params.title} not found in the database.`,
+      message: `Story ${req.body.title} not found in the database.`,
     });
   }
 
   // remove story from the db
   const result = await Genre.updateMany(
-    { stories: { $elemMatch: { title: req.params.title } } },
-    { $pull: { stories: { title: req.params.title } } }
+    { stories: { $elemMatch: { _id: req?.params?.id } } },
+    { $pull: { stories: { _id: req?.params?.id } } }
   ).exec();
 
   // check if body is empty
@@ -178,6 +173,7 @@ const updateStory = async (req, res) => {
 
   // create the new story
   const newStory = {
+    _id: req?.params?.id,
     title: req.body.title,
     author: req.body.author,
     body: req.body.body,
@@ -193,7 +189,7 @@ const updateStory = async (req, res) => {
 
   res.status(200).json({
     // display new story
-    message: `Story ${req.params.title} successfully updated in genres ${req.body.genres}.`,
+    message: `Story ${req.body.title} successfully updated in genres ${req.body.genres}.`,
   });
 };
 
@@ -225,23 +221,14 @@ const getAllStoriesGlobal = async (req, res) => {
 
 // delete a story in all genres
 const deleteStory = async (req, res) => {
-  // check if empty
-  // if (!req.body.title || !req?.body?.id)
-  //   return res.status(400).json({ message: "Title and id are required." });
-
-  // // check if story exists in any genre
-  // const story = await Genre.findOne({
-  //   stories: { $elemMatch: { title: req.body.title } },
-  // }).exec();
-
   // check if no id and title provided
   if (!req.body.title || !req.body.id) {
     return res.status(400).json({ message: "Title and id are required." });
   }
 
-  // check if story exists in any genre by id
+  // check if story exists in any genre by id and title
   const story = await Genre.findOne({
-    stories: { $elemMatch: { _id: req.body.id } },
+    stories: { $elemMatch: { _id: req.body.id, title: req.body.title } },
   }).exec();
 
   if (!story) {
@@ -250,34 +237,15 @@ const deleteStory = async (req, res) => {
       .json({ message: `Story ${req.body.title} not found.` });
   }
 
-  // remove story from all genres
-  // const result = await Genre.updateMany(
-  //   {},
-  //   { $pull: { stories: { title: req.body.title } } }
-  // ).exec();
-
-  // res.status(200).json(result);
-
-  // check db for story with id and title
-  const story2 = await Genre.findOne({
-    stories: { $elemMatch: { _id: req.body.id, title: req.body.title } },
-  }).exec();
-
   // if id and title belong to the same story in the db then remove it from all genres
-  if (story2) {
-    const result = await Genre.updateMany(
-      {},
-      { $pull: { stories: { title: req.body.title } } }
-    ).exec();
-    res.status(200).json({
-      message: `Story ${req.body.title} successfully deleted from all genres.`,
-    });
-  }
 
-  // if id and title don't belong to the same story in the db then return error
-  else {
-    res.status(404).json({ message: `Story ${req.body.title} not found.` });
-  }
+  const result = await Genre.updateMany(
+    {},
+    { $pull: { stories: { _id: req.body.id, title: req.body.title } } }
+  ).exec();
+  res.status(200).json({
+    message: `Story ${req.body.title} successfully deleted from all genres.`,
+  });
 };
 
 // delete a story in a specific genre
@@ -325,11 +293,6 @@ const deleteStoryGenre = async (req, res) => {
   }).exec();
 
   if (!storyGenre) return;
-
-  // await Genre.updateOne(
-  //   { stories: { $elemMatch: { title: req.body.title } } },
-  //   { $pull: { genres: req.params.genre } }
-  // ).exec();
 
   // update story to remove genre from genres array in story object
   const storyUpdate = storyGenre.stories.find(
