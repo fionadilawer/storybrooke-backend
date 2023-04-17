@@ -19,7 +19,7 @@ router
   .get(storyController.getAllStoriesGlobal);
 
 router
-  .route("/:title")
+  .route("/:id")
   .put(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.updateStory
