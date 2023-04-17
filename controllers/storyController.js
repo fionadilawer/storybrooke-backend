@@ -181,6 +181,31 @@ const updateStory = async (req, res) => {
     date: new Date(),
   };
 
+  // check if genre exists and update story by removing non-existent genres
+
+  for (let i = 0; i < newStory.genres.length; i++) {
+    const genre = await Genre.findOne({ genre: newStory.genres[i] }).exec();
+    if (!genre || newStory.genres.indexOf(newStory.genres[i]) !== i) {
+      newStory.genres.splice(i, 1);
+      i--;
+      continue;
+    }
+  }
+
+  // check if any of the remaining genres already have the story title
+  for (let i = 0; i < newStory.genres.length; i++) {
+    const genre = await Genre.findOne({
+      genre: newStory.genres[i],
+      stories: { $elemMatch: { title: newStory.title } },
+    }).exec();
+
+    if (genre) {
+      newStory.genres.splice(i, 1);
+      i--;
+      continue;
+    }
+  }
+
   // add story to all genres
   const result2 = await Genre.updateMany(
     { genre: { $in: req.body.genres } },
