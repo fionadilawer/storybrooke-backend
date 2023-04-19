@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Genre = require("../model/Genre");
 
-// create a story
+// CREATE A NEW STORY
 const createStory = async (req, res) => {
   // story object
   const story = {
@@ -48,6 +48,12 @@ const createStory = async (req, res) => {
       continue;
     }
 
+    // check if genres length is greater than 3
+    if (story.genres.length > 3) {
+      // remove anything after the 3rd index
+      story.genres.splice(3, story.genres.length - 3);
+    }
+
     // push story to genre
     genre.stories.push(story);
 
@@ -92,7 +98,7 @@ const getAllStories = async (req, res) => {
   res.status(200).json(genre.stories);
 };
 
-// get a story in a genre
+// GET A STORY IN A SPECIFIC GENRE
 const getStory = async (req, res) => {
   // check if empty
   if (!req.body.title)
@@ -119,7 +125,7 @@ const getStory = async (req, res) => {
   res.status(200).json(story);
 };
 
-// get a story in all genres
+// GET A STORY IN ALL GENRES
 const getStoryAllGenres = async (req, res) => {
   // check if empty
   if (!req.body.title)
@@ -141,11 +147,18 @@ const getStoryAllGenres = async (req, res) => {
   res.status(200).json(result);
 };
 
-// update a story globally
+//  UPDATE STORY GLOBALLY
+
 const updateStory = async (req, res) => {
   // check if params are empty
   if (!req?.params?.id)
     return res.status(400).json({ message: "Story ID is required." });
+
+  // check if body is empty
+  if (!req.body.title || !req.body.author || !req.body.body || !req.body.genres)
+    return res.status(400).json({
+      message: `All fields are required. Please enter the title, author, body, and genres.`,
+    });
 
   // check if story exists in any genre in db
   const story = await Genre.findOne({
@@ -159,18 +172,6 @@ const updateStory = async (req, res) => {
     });
   }
 
-  // remove story from the db
-  const result = await Genre.updateMany(
-    { stories: { $elemMatch: { _id: req?.params?.id } } },
-    { $pull: { stories: { _id: req?.params?.id } } }
-  ).exec();
-
-  // check if body is empty
-  if (!req.body.title || !req.body.author || !req.body.body || !req.body.genres)
-    return res.status(400).json({
-      message: `All fields are required. Please enter the title, author, body, and genres.`,
-    });
-
   // create the new story
   const newStory = {
     _id: req?.params?.id,
@@ -181,6 +182,29 @@ const updateStory = async (req, res) => {
     date: new Date(),
   };
 
+  // check if the new story story body already exists in the db with a different id
+
+  const storyExists = await Genre.findOne({
+    stories: {
+      $elemMatch: {
+        body: newStory.body,
+        _id: { $ne: req?.params?.id },
+      },
+    },
+  }).exec();
+
+  if (storyExists) {
+    return res.status(400).json({
+      message: `Story ${req.body.title} already exists in the database. Please come up with a unique story. Thank you for your understanding.`,
+    });
+  }
+
+  // remove story from the db
+  const result = await Genre.updateMany(
+    { stories: { $elemMatch: { _id: req?.params?.id } } },
+    { $pull: { stories: { _id: req?.params?.id } } }
+  ).exec();
+
   // check if genre exists and update story by removing non-existent genres
 
   for (let i = 0; i < newStory.genres.length; i++) {
@@ -190,20 +214,45 @@ const updateStory = async (req, res) => {
       i--;
       continue;
     }
-  }
 
-  // check if any of the remaining genres already have the story title
-  for (let i = 0; i < newStory.genres.length; i++) {
-    const genre = await Genre.findOne({
+    // check if any of the remaining genres already have the story title
+    const storyExists = await Genre.findOne({
       genre: newStory.genres[i],
       stories: { $elemMatch: { title: newStory.title } },
     }).exec();
 
-    if (genre) {
+    if (storyExists) {
       newStory.genres.splice(i, 1);
       i--;
       continue;
     }
+  }
+
+  // check if any of the remaining genres already have the story title
+  // for (let i = 0; i < newStory.genres.length; i++) {
+  //   const genre = await Genre.findOne({
+  //     genre: newStory.genres[i],
+  //     stories: { $elemMatch: { title: newStory.title } },
+  //   }).exec();
+
+  //   if (genre) {
+  //     newStory.genres.splice(i, 1);
+  //     i--;
+  //     continue;
+  //   }
+  // }
+
+  // check if genres length is greater than 3
+  if (newStory.genres.length > 3) {
+    // remove anything after the 3rd index
+    newStory.genres.splice(3, newStory.genres.length - 3);
+  }
+
+  // if by this point no genres are valid, return message
+  if (newStory.genres.length === 0) {
+    return res.status(400).json({
+      message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
+    });
   }
 
   // add story to all genres
@@ -218,7 +267,8 @@ const updateStory = async (req, res) => {
   });
 };
 
-// get all stories in all genres
+// GET ALL STORIES GLOBALLY
+
 const getAllStoriesGlobal = async (req, res) => {
   const genres = await Genre.find().exec();
 
@@ -244,7 +294,28 @@ const getAllStoriesGlobal = async (req, res) => {
   res.status(200).json(stories);
 };
 
-// delete a story in all genres
+// COUNT STORIES GLOBALLY
+const countStoriesGlobal = async (req, res) => {
+  const genres = await Genre.find().exec();
+
+  if (!genres) {
+    return res.status(404).json({ message: `No genres found.` });
+  }
+
+  let stories = [];
+  for (let i = 0; i < genres.length; i++) {
+    stories = [...stories, ...genres[i].stories];
+  }
+
+  // if no stories in genre
+  if (stories.length === 0) {
+    return res.status(404).json({ message: `No stories found.` });
+  }
+
+  res.status(200).json({ count: stories.length });
+};
+
+// DELETE A STORY GLOBALLY
 const deleteStory = async (req, res) => {
   // check if no id and title provided
   if (!req.body.title || !req.body.id) {
@@ -273,7 +344,7 @@ const deleteStory = async (req, res) => {
   });
 };
 
-// delete a story in a specific genre
+// DELETE A STORY FROM A GENRE
 const deleteStoryGenre = async (req, res) => {
   // check if empty
   if (!req.body.title)
@@ -340,4 +411,5 @@ module.exports = {
   getStoryAllGenres,
   getAllStoriesGlobal,
   deleteStoryGenre,
+  countStoriesGlobal,
 };
