@@ -26,6 +26,8 @@ router
   );
 router.route("/find").get(storyController.getStoryAllGenres);
 
+router.route("/count").get(storyController.countStoriesGlobal);
+
 // specific genre
 router
   .route("/:genre")
