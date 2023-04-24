@@ -9,6 +9,7 @@ const StorySchema = new Schema({
   author: {
     type: String,
     required: true,
+    default: "Anonymous", 
   },
   body: {
     type: String,
