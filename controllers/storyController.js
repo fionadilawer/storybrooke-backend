@@ -13,6 +13,13 @@ const createStory = async (req, res) => {
     date: new Date(),
   };
 
+  // if body is less than 50 characters, return error
+  // if (story.body.length < 50) {
+  //   return res.status(400).json({
+  //     message: "Story body must be at least 50 characters.",
+  //   });
+  // }
+
   // check if genre exists and update story by removing non-existent genres
 
   for (let i = 0; i < story.genres.length; i++) {
@@ -69,12 +76,14 @@ const createStory = async (req, res) => {
   // if by this point no genres are valid, return message
   if (story.genres.length === 0) {
     return res.status(400).json({
-      message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
+      message: `It appears that none of the genres you specified were valid options. The most likely reason is that the title of the story you're trying to add already exists in the genres you specified. Please change the title or the genres and try again.`,
+      // message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
     });
   }
 
   res.status(201).json({
-    message: `Story ${story.title} created in genres ${story.genres}. Exceptions: 1. If the story's title already exists in a specified genre or a genre simply doesn't exist, the story will not be added to the specified genres. 2. Moreover, if the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. Also, it creates less confusion for the user if a specific genre does not have multiple stories with the same title. Thank you for your understanding.`,
+    message: `The story ${story.title} has been successfully published in genres ${story.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
+    // message: `Story ${story.title} created in genres ${story.genres}. Exceptions: 1. If the story's title already exists in a specified genre or a genre simply doesn't exist, the story will not be added to the specified genres. 2. Moreover, if the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. Also, it creates less confusion for the user if a specific genre does not have multiple stories with the same title. Thank you for your understanding.`,
   });
 };
 
@@ -91,7 +100,7 @@ const getAllStories = async (req, res) => {
   // if no stories in genre
   if (genre.stories.length === 0) {
     return res
-      .status(404)
+      .status(200)
       .json({ message: `No stories found in genre ${req.params.genre}.` });
   }
 
@@ -251,7 +260,8 @@ const updateStory = async (req, res) => {
   // if by this point no genres are valid, return message
   if (newStory.genres.length === 0) {
     return res.status(400).json({
-      message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
+      message: `It appears that none of the genres you specified were valid options. The most likely reason is that the title of the story you're trying to add already exists in the genres you specified. Please change the title or the genres and try again.`,
+      // message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
     });
   }
 
@@ -263,7 +273,8 @@ const updateStory = async (req, res) => {
 
   res.status(200).json({
     // display new story
-    message: `Story ${req.body.title} successfully updated in genres ${req.body.genres}.`,
+    // message: `Story ${req.body.title} successfully updated in genres ${req.body.genres}.`,
+    message: `The story ${req.body.titl} has been successfully published in genres ${req.body.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
   });
 };
 
