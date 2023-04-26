@@ -6,12 +6,13 @@ const createStory = async (req, res) => {
   // story object
   const story = {
     _id: new mongoose.Types.ObjectId(),
-    title: req.body.title,
+    title: req.body.title.toUpperCase().trim().split(/ +/).join(' '),
     author: req.body.author,
     body: req.body.body,
     genres: req.body.genres,
     date: new Date(),
   };
+
 
   // if body is less than 50 characters, return error
   // if (story.body.length < 50) {
@@ -135,26 +136,62 @@ const getStory = async (req, res) => {
 };
 
 // GET A STORY IN ALL GENRES
-const getStoryAllGenres = async (req, res) => {
-  // check if empty
-  if (!req.body.title)
-    return res.status(400).json({ message: "Title is required." });
+// const getStoryAllGenres = async (req, res) => {
+//   // check if empty
+//   if (!req.params.title)
+//     return res.status(400).json({ message: "Title is required." });
 
-  // check if story exists in any genre
-  const story = await Genre.findOne({
-    stories: { $elemMatch: { title: req.body.title } },
+//   // check if story exists in any genre
+//   const story = await Genre.findOne({
+//     stories: { $elemMatch: { title: req.params.title } },
+//   }).exec();
+
+//   if (!story) {
+//     return res
+//       .status(200)
+//       .json({ message: `Story ${req.params.title} not found.` });
+//   }
+
+//   // return story
+//   const result = story.stories.find((story) => story.title === req.params.title);
+//   res.status(200).json(result);
+// };
+
+// && req.params.title.toUpperCase() && req.params.title && req.params.title.charAt(0).toUpperCase() + req.params.title.slice(1) && req.params.title.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+
+
+// GET ALL STORIES WITH  THE SAME TITLE IN THE DATABASE
+const getStoryAllGenres = async (req, res) => {
+  // find stories with both uppercase and lowercase titles, capitalized titles and titles with each word capitalized
+  const newTitle = req?.params?.title.toUpperCase().trim().split(/ +/).join(' ');
+
+  const stories = await Genre.find({
+    stories: { $elemMatch: { title: newTitle
+     } },
   }).exec();
 
-  if (!story) {
+  if (!stories) {
     return res
       .status(404)
-      .json({ message: `Story ${req.body.title} not found.` });
+      .json({ message: `No stories found with title ${newTitle}.` });
   }
 
-  // return story
-  const result = story.stories.find((story) => story.title === req.body.title);
-  res.status(200).json(result);
-};
+  // find stories from stories array with the same title
+  const newStories = stories.map((genre) =>
+    genre.stories.find((story) => story.title === newTitle)
+  );
+
+  // filter the stories to remove duplicate genres
+  const filteredStories = newStories.filter(
+    (story, index, self) =>
+      index === self.findIndex((s) => s.genres[0] === story.genres[0])
+  );
+
+  res.status(200).json(filteredStories);
+}
+
+
+
 
 //  UPDATE STORY GLOBALLY
 
