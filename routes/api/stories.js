@@ -8,10 +8,7 @@ const verifyRoles = require("../../middleware/verifyRoles");
 router
   .route("/")
   // .get(storyController.getAllStories)
-  .post(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storyController.createStory
-  )
+  .post(storyController.createStory)
   .delete(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.deleteStory
@@ -24,7 +21,7 @@ router
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.updateStory
   );
-router.route("/find").get(storyController.getStoryAllGenres);
+router.route("/find/:title").get(storyController.getStoryAllGenres);
 
 router.route("/count").get(storyController.countStoriesGlobal);
 
