@@ -15,6 +15,7 @@ router
   )
   .get(storyController.getAllStoriesGlobal);
 
+// specific genre
 router
   .route("/:id")
   .put(
@@ -25,7 +26,8 @@ router.route("/find/:title").get(storyController.getStoryAllGenres);
 
 router.route("/count").get(storyController.countStoriesGlobal);
 
-// specific genre
+router.route("/:author").get(storyController.getStoriesByAuthor);
+
 router
   .route("/:genre")
   .get(storyController.getAllStories)
