@@ -196,16 +196,17 @@ const getStoryAllGenres = async (req, res) => {
 const getStoriesByAuthor = async (req, res) => {
   // check if empty
   if (!req.params.author)
-    return res.status(400).json({ message: "Author is required." });
+    return res.status(400).json({ message: "Author is required" });
 
   const author =
-    req.params.author.charAt(0).toUpperCase() + req.params.author.slice(1);
+    req.params.author.charAt(0).toUpperCase() + req.params.author.slice(1).toLowerCase();
 
   // check if author is a user in the database
   const user = await User.findOne({ username: author }).exec();
 
   if (!user) {
-    return res.status(404).json({ message: `User ${author} not found.` });
+    console.log(`User ${author} not found`)
+    return res.status(404).json({ message: `User ${author} not found` });
   }
 
   // check if the user has published any stories
@@ -218,7 +219,7 @@ const getStoriesByAuthor = async (req, res) => {
   if (!stories) {
     return res
       .status(200)
-      .json({ message: `${author} has not published any stories.` });
+      .json({ message: `${author} has not published any stories` });
   }
 
   // return stories
