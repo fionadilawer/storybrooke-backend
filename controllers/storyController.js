@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 const Genre = require("../model/Genre");
+const User = require("../model/User");
 
 // CREATE A NEW STORY
 const createStory = async (req, res) => {
   // story object
   const story = {
     _id: new mongoose.Types.ObjectId(),
-    title: req.body.title.toUpperCase().trim().split(/ +/).join(' '),
+    title: req.body.title.toUpperCase().trim().split(/ +/).join(" "),
     author: req.body.author,
     body: req.body.body,
     genres: req.body.genres,
     date: new Date(),
   };
-
 
   // if body is less than 50 characters, return error
   // if (story.body.length < 50) {
@@ -159,15 +159,17 @@ const getStory = async (req, res) => {
 
 // && req.params.title.toUpperCase() && req.params.title && req.params.title.charAt(0).toUpperCase() + req.params.title.slice(1) && req.params.title.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
-
 // GET ALL STORIES WITH  THE SAME TITLE IN THE DATABASE
 const getStoryAllGenres = async (req, res) => {
   // find stories with both uppercase and lowercase titles, capitalized titles and titles with each word capitalized
-  const newTitle = req?.params?.title.toUpperCase().trim().split(/ +/).join(' ');
+  const newTitle = req?.params?.title
+    .toUpperCase()
+    .trim()
+    .split(/ +/)
+    .join(" ");
 
   const stories = await Genre.find({
-    stories: { $elemMatch: { title: newTitle
-     } },
+    stories: { $elemMatch: { title: newTitle } },
   }).exec();
 
   if (!stories) {
@@ -188,10 +190,41 @@ const getStoryAllGenres = async (req, res) => {
   );
 
   res.status(200).json(filteredStories);
-}
+};
 
+// GET ALL STORIES WRITTEN BY A SPECIFIC AUTHOR
+const getStoriesByAuthor = async (req, res) => {
+  // check if empty
+  if (!req.params.author)
+    return res.status(400).json({ message: "Author is required." });
 
+  const author =
+    req.params.author.charAt(0).toUpperCase() + req.params.author.slice(1);
 
+  // check if author is a user in the database
+  const user = await User.findOne({ username: author }).exec();
+
+  if (!user) {
+    return res.status(404).json({ message: `User ${author} not found.` });
+  }
+
+  // check if the user has published any stories
+  const stories = await Genre.findOne({
+    stories: {
+      $elemMatch: { author: author },
+    },
+  }).exec();
+
+  if (!stories) {
+    return res
+      .status(200)
+      .json({ message: `${author} has not published any stories.` });
+  }
+
+  // return stories
+  const result = stories.stories.filter((story) => story.author === author);
+  res.status(200).json(result);
+};
 
 //  UPDATE STORY GLOBALLY
 
@@ -460,4 +493,5 @@ module.exports = {
   getAllStoriesGlobal,
   deleteStoryGenre,
   countStoriesGlobal,
+  getStoriesByAuthor,
 };
