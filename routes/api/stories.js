@@ -26,7 +26,7 @@ router.route("/find/:title").get(storyController.getStoryAllGenres);
 
 router.route("/count").get(storyController.countStoriesGlobal);
 
-router.route("/:author").get(storyController.getStoriesByAuthor);
+router.route("/author/:author").get(storyController.getStoriesByAuthor);
 
 router
   .route("/:genre")
