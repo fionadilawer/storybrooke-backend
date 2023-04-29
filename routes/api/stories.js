@@ -22,7 +22,7 @@ router
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storyController.updateStory
   );
-router.route("/find/:title").get(storyController.getStoryAllGenres);
+router.route("/title/:title").get(storyController.getStoryAllGenres);
 
 router.route("/count").get(storyController.countStoriesGlobal);
 
