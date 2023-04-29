@@ -105,6 +105,9 @@ const getAllStories = async (req, res) => {
       .json({ message: `No stories found in genre ${req.params.genre}.` });
   }
 
+  // sort stories by date (newest to oldest)
+  genre.stories.sort((a, b) => b.date - a.date);
+
   res.status(200).json(genre.stories);
 };
 
@@ -189,43 +192,144 @@ const getStoryAllGenres = async (req, res) => {
       index === self.findIndex((s) => s.genres[0] === story.genres[0])
   );
 
+  // sort by date published in descending order
+  filteredStories.sort((a, b) => b.date - a.date);
+
   res.status(200).json(filteredStories);
 };
 
-// GET ALL STORIES WRITTEN BY A SPECIFIC AUTHOR
+// GET ALL STORIES WRITTEN BY THE SAME AUTHOR IN THE DATABASE
 const getStoriesByAuthor = async (req, res) => {
   // check if empty
-  if (!req.params.author)
-    return res.status(400).json({ message: "Author is required" });
+  if (!req.params.author) {
+    return res.status(400).json({ message: "Author is required." });
+  }
 
   const author =
-    req.params.author.charAt(0).toUpperCase() + req.params.author.slice(1).toLowerCase();
+    req.params.author.charAt(0).toUpperCase() +
+    req.params.author.slice(1).toLowerCase();
 
-  // check if author is a user in the database
+  // check if author exists
   const user = await User.findOne({ username: author }).exec();
 
-  if (!user) {
-    console.log(`User ${author} not found`)
+  // if (!user) {
+  //   return res.status(404).json({ message: `Author ${author} not found.` });
+  // }
+
+  // check if author has published any stories
+  const stories = await Genre.find({
+    stories: { $elemMatch: { author: author } },
+  }).exec();
+
+  // author name is Anonymous
+  if (author === "Anonymous") {
+    const anonymousStories = await Genre.find({
+      stories: { $elemMatch: { author: "Anonymous" } },
+    }).exec();
+
+    if (!anonymousStories) {
+      return res
+        .status(200)
+        .json({ message: `Anonymous has not published any stories.` });
+    } else {
+      // find stories from stories array with the same author
+      const newStories = anonymousStories.map((genre) =>
+        genre.stories.filter((story) => story.author === "Anonymous")
+      );
+
+      // return an array of objects
+      const result = newStories.flat();
+
+      // sort by date published in descending order
+      result.sort((a, b) => b.date - a.date);
+
+      return res.status(200).json(result);
+    }
+  }
+
+  // if no user found in database
+  if (!user && author !== "Anonymous") {
+    console.log(`User ${author} not found`);
     return res.status(404).json({ message: `User ${author} not found` });
   }
 
-  // check if the user has published any stories
-  const stories = await Genre.findOne({
-    stories: {
-      $elemMatch: { author: author },
-    },
-  }).exec();
-
+  // if no stories found
   if (!stories) {
     return res
       .status(200)
-      .json({ message: `${author} has not published any stories` });
+      .json({ message: `${author} has not published any stories.` });
   }
 
-  // return stories
-  const result = stories.stories.filter((story) => story.author === author);
+  // find stories from stories array with the same author
+  const newStories = stories.map((genre) =>
+    genre.stories.filter((story) => story.author === author)
+  );
+
+  // return an array of objects
+  const result = newStories.flat();
+
+  // sort by date published in descending order
+  result.sort((a, b) => b.date - a.date);
+
   res.status(200).json(result);
 };
+
+// GET ALL STORIES WRITTEN BY A SPECIFIC AUTHOR
+// const getStoriesByAuthor = async (req, res) => {
+//   // check if empty
+//   if (!req.params.author)
+//     return res.status(400).json({ message: "Author is required" });
+
+//   const author =
+//     req.params.author.charAt(0).toUpperCase() +
+//     req.params.author.slice(1).toLowerCase();
+
+//   // check if author is a user in the database
+//   const user = await User.findOne({ username: author }).exec();
+
+//   // check if the user has published any stories
+//   const stories = await Genre.findOne({
+//     stories: {
+//       $elemMatch: { author: author },
+//     },
+//   }).exec();
+
+//   if (!stories) {
+//     return res
+//       .status(200)
+//       .json({ message: `${author} has not published any stories` });
+//   }
+
+//   // if no user found but name is Anonymous
+//   if (!user && author === "Anonymous") {
+//     //  if no stories found
+//     if (stories.stories.length === 0) {
+//       return res
+//         .status(200)
+//         .json({ message: `${author} has not published any stories` });
+//     } else {
+//       // return stories
+//       const result = stories.stories.filter((story) => story.author === author);
+
+//       // sort by date published in descending order
+//       result.sort((a, b) => b.date - a.date);
+//       return res.status(200).json(result);
+//     }
+//   }
+
+//   // if no user found
+//   if (!user) {
+//     console.log(`User ${author} not found`);
+//     return res.status(404).json({ message: `User ${author} not found` });
+//   }
+
+//   // return stories
+//   const result = stories.stories.filter((story) => story.author === author);
+
+//   // sort by date published in descending order
+//   result.sort((a, b) => b.date - a.date);
+//   res.status(200).json(result);
+// };
 
 //  UPDATE STORY GLOBALLY
 
@@ -373,6 +477,9 @@ const getAllStoriesGlobal = async (req, res) => {
     (story, index, self) =>
       index === self.findIndex((b) => b.body === story.body)
   );
+
+  // sort by date in descending order
+  stories.sort((a, b) => b.date - a.date);
   res.status(200).json(stories);
 };
 
