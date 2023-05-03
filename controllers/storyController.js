@@ -4,22 +4,16 @@ const User = require("../model/User");
 
 // CREATE A NEW STORY
 const createStory = async (req, res) => {
+  const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
   // story object
   const story = {
     _id: new mongoose.Types.ObjectId(),
-    title: req.body.title.toUpperCase().trim().split(/ +/).join(" "),
+    title: newTitle,
     author: req.body.author,
     body: req.body.body,
     genres: req.body.genres,
     date: new Date(),
   };
-
-  // if body is less than 50 characters, return error
-  // if (story.body.length < 50) {
-  //   return res.status(400).json({
-  //     message: "Story body must be at least 50 characters.",
-  //   });
-  // }
 
   // check if genre exists and update story by removing non-existent genres
 
@@ -60,9 +54,9 @@ const createStory = async (req, res) => {
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-
+    console.log(genre);
     // check if story title exists in the genre
-    if (genre.stories.find((story) => story.title === req.body.title)) {
+    if (genre.stories.find((story) => story.title === newTitle)) {
       // remove the genre from the story's genres array
       story.genres.splice(i, 1);
       i--;
