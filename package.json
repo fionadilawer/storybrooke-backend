@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "storybrooke-backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TracK92/backend.git"
+    "url": "git+https://github.com/trace-kadenyi/storybrooke-backend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/TracK92/backend/issues"
+    "url": "https://github.com/trace-kadenyi/storybrooke-backend/issues"
   },
-  "homepage": "https://github.com/TracK92/backend#readme",
+  "homepage": "https://github.com/trace-kadenyi/storybrooke-backend#readme",
   "devDependencies": {
     "nodemon": "^2.0.20"
   },
