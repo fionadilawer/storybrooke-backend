@@ -95,7 +95,7 @@ const createStory = async (req, res) => {
   });
 };
 
-// get all stories in a genre
+// GET ALL STORIES IN A GENRE
 const getAllStories = async (req, res) => {
   const genre = await Genre.findOne({ genre: req.params.genre }).exec();
 
