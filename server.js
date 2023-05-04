@@ -50,6 +50,8 @@ app.use(verifyJWT);
 app.use("/employees", require("./routes/api/employees"));
 app.use("/users", require("./routes/api/users"));
 app.use("/", require("./routes/interest"));
+app.use("/genres", require("./routes/api/genres"));
+app.use("/story", require("./routes/api/stories"));
 
 // handle 404
 app.all("*", (req, res) => {
