@@ -52,6 +52,7 @@ app.use("/users", require("./routes/api/users"));
 app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
 app.use("/story", require("./routes/api/stories"));
+app.use("/profile", require("./routes/api/profiles"));
 
 // handle 404
 app.all("*", (req, res) => {
