@@ -1,42 +1,42 @@
 const express = require("express");
 const router = express.Router();
 const ROLES_LIST = require("../../config/rolesList");
-const storyController = require("../../controllers/storyController");
+const storiesController = require("../../controllers/storiesController");
 const verifyRoles = require("../../middleware/verifyRoles");
 
 // global routes
 router
   .route("/")
-  // .get(storyController.getAllStories)
-  .post(storyController.createStory)
+  // .get(storiesController.getAllStories)
+  .post(storiesController.createStory)
   .delete(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storyController.deleteStory
+    storiesController.deleteStory
   )
-  .get(storyController.getAllStoriesGlobal);
+  .get(storiesController.getAllStoriesGlobal);
 
 // specific genre
 router
   .route("/:id")
   .put(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storyController.updateStory
+    storiesController.updateStory
   );
-router.route("/title/:title").get(storyController.getStoryAllGenres);
+router.route("/title/:title").get(storiesController.getStoryAllGenres);
 
-router.route("/count").get(storyController.countStoriesGlobal);
+router.route("/count").get(storiesController.countStoriesGlobal);
 
-router.route("/author/:author").get(storyController.getStoriesByAuthor);
+router.route("/author/:author").get(storiesController.getStoriesByAuthor);
 
 router
   .route("/:genre")
-  .get(storyController.getAllStories)
+  .get(storiesController.getAllStories)
 
   .delete(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storyController.deleteStoryGenre
+    storiesController.deleteStoryGenre
   );
 
-router.route("/:genre/find").get(storyController.getStory);
+router.route("/:genre/find").get(storiesController.getStory);
 
 module.exports = router;
