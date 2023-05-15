@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Profile = require("./Profile");
 
 const UserSchema = new Schema({
   firstname: {
@@ -25,6 +26,11 @@ const UserSchema = new Schema({
   interests: {
     type: Array,
     default: [],
+  },
+  profile: {
+    type: Profile.schema,
+    default: null,
+    required: true,
   },
   password: {
     type: String,
