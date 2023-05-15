@@ -1,4 +1,5 @@
 const User = require("../model/User");
+const Profile = require("../model/Profile");
 const bcrypt = require("bcrypt");
 
 const handleNewUser = async (req, res) => {
@@ -21,14 +22,24 @@ const handleNewUser = async (req, res) => {
   try {
     // encrypt the password
     const hashedPwd = await bcrypt.hash(pwd, 10);
+    // create user profile
+    const profile = {
+      firstname: newFirstName,
+      lastname: newLastName,
+      username: newUser,
+    };
     // create and save new user
     const result = await User.create({
       //  capitalize first letter of names
       firstname: newFirstName,
       lastname: newLastName,
       username: newUser,
+      profile: profile,
       password: hashedPwd,
     });
+
+    // save profile to profile collection
+    await Profile.create(profile);
 
     console.log(result);
 
