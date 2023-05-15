@@ -1,5 +1,6 @@
 const Profile = require("../model/Profile");
 const User = require("../model/User");
+const Genre = require("../model/Genre");
 
 const createProfile = async (req, res) => {
   const { firstname, lastname, username, bio, profilePicture } = req.body;
@@ -129,13 +130,53 @@ const updateProfile = async (req, res) => {
   ).exec();
 
   // save new profile to user collection
-  await User.findOneAndUpdate(
-    { username: req.params.username },
-    { profile: profile },
-    { new: true }
-  ).exec();
+  await User.findOneAndUpdate({ profile: profile }, { new: true }).exec();
 
   res.status(200).json(profile);
+
+  // FOR LATER
+
+  // // if username is updated, update username in user collection and stories collection
+  // if (req.body.username) {
+  //   // check if username is already taken
+  //   const usernameExists = await Profile.findOne({
+  //     username: req.body.username,
+  //   }).exec();
+
+  //   if (usernameExists) {
+  //     return res.status(400).json({
+  //       message: `Username ${req.body.username} is already taken.`,
+  //     });
+  //   }
+  // }
+
+  // // update username in user collection
+  // await User.findOneAndUpdate(
+  //   { username: req.params.username },
+  //   { username: req.body.username },
+  //   { new: true }
+  // ).exec();
+
+  // // // update username in stories collection
+  // // await Story.updateMany(
+  // //   { username: req.params.username },
+  // //   { username: req.body.username },
+  // //   { new: true }
+  // // ).exec();
+
+  // // update username in the stories in genre collections
+  // await Genre.updateMany(
+  //   { stories: { $elemMatch: { username: req.params.username } } },
+  //   { $set: { "stories.$.username": req.body.username } },
+  //   { new: true }
+  // ).exec();
+
+  // // update username in the stories in user collections
+  // await User.updateMany(
+  //   { stories: { $elemMatch: { username: req.params.username } } },
+  //   { $set: { "stories.$.username": req.body.username } },
+  //   { new: true }
+  // ).exec();
 };
 
 module.exports = {
