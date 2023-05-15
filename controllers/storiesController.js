@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Genre = require("../model/Genre");
 const User = require("../model/User");
+const Story = require("../model/Story");
 
 // CREATE A NEW STORY
 const createStory = async (req, res) => {
@@ -28,6 +29,18 @@ const createStory = async (req, res) => {
 
   // check the story for plagiarism (i.e. check if a large chunk of the story already exists in the database)
 
+  // story collection
+  const resultInStory = await Story.findOne({
+    body: {
+      $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
+      $regex: story.body.slice(-Math.floor(story.body.length / 2)),
+      $regex: story.body.slice(
+        Math.floor(story.body.length / 4),
+        -Math.ceil(story.body.length / 4)
+      ),
+    },
+  }).exec();
+
   const result = await Genre.findOne({
     stories: {
       $elemMatch: {
@@ -44,9 +57,9 @@ const createStory = async (req, res) => {
     },
   }).exec();
 
-  if (result) {
+  if (resultInStory) {
     return res.status(400).json({
-      message: `The story you're trying to add already exists in at least one genre in the database (i.e. ${result.genre}). Please come up with a new story. If you want to add this story to another genre, please use the update story route.`,
+      message: `The story you're trying to add already exists in at least one genre in the database (e.g. ${resultInStory.genres[0]}). Please come up with a new story. If you want to add this story to another genre, please use the update story route.`,
     });
   }
 
@@ -69,24 +82,24 @@ const createStory = async (req, res) => {
       story.genres.splice(3, story.genres.length - 3);
     }
 
+    // push story to story collection
+    const newStory = new Story(story);
     // push story to genre
-    genre.stories.push(story);
+    genre.stories.push(newStory);
 
     // save story in genre
     try {
+      // save new story in story collection
+      await newStory.save();
+      // save new story in genre
       const result = await genre.save();
       // save the story in the current user's stories array
       const currentUserStories = await User.findOne({
         username: req.body.author,
       }).exec();
-      // dont push duplicate stories body to user
-      if (
-        !currentUserStories.stories.find(
-          (story) => story.body === req.body.body
-        )
-      ) {
-        currentUserStories.stories.push(story);
-      }
+      // push story to user's stories array
+      currentUserStories.stories.push(newStory);
+
       // save user
       await currentUserStories.save();
 
