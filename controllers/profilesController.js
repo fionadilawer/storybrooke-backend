@@ -67,6 +67,78 @@ const createProfile = async (req, res) => {
   }
 };
 
+// GET USER PROFILE
+const getProfile = async (req, res) => {
+  // check if no params
+  if (!req.params.username) {
+    return res.status(400).json({ message: "No username provided." });
+  }
+
+  // check if profile exists
+  const profileExists = await Profile.findOne({
+    username: req.params.username,
+  }).exec();
+
+  if (!profileExists) {
+    return res.status(404).json({
+      message: `No profile with username ${req.params.username} found.`,
+    });
+  }
+
+  // find and return profile
+  const profile = await Profile.findOne({
+    username: req.params.username,
+  }).exec();
+
+  res.status(200).json(profile);
+};
+
+// UPDATE USER PROFILE
+const updateProfile = async (req, res) => {
+  // check if no params
+  if (!req.params.username) {
+    return res.status(400).json({ message: "No username provided." });
+  }
+
+  // check if no body
+  if (!req.body) {
+    return res.status(400).json({ message: "No update provided." });
+  }
+
+  // check if bio is empty
+  if (req.body.bio === "") {
+    return res.status(400).json({ message: "Bio cannot be empty." });
+  }
+
+  // check if profile exists
+  const profileExists = await Profile.findOne({
+    username: req.params.username,
+  }).exec();
+
+  if (!profileExists) {
+    return res.status(404).json({
+      message: `No profile with username ${req.params.username} found.`,
+    });
+  }
+
+  // find and update profile
+  const profile = await Profile.findOneAndUpdate(
+    { username: req.params.username },
+    { bio: req.body.bio },
+    { new: true }
+  ).exec();
+
+  // save new profile to user collection
+  await User.findOneAndUpdate(
+    { username: req.params.username },
+    { profile: profile },
+    { new: true }
+  ).exec();
+
+  res.status(200).json(profile);
+};
+
 module.exports = {
-  createProfile,
+  getProfile,
+  updateProfile,
 };
