@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Profile = require("./Profile");
+const Story = require("./Story");
 
 const UserSchema = new Schema({
   firstname: {
@@ -25,6 +26,10 @@ const UserSchema = new Schema({
   },
   interests: {
     type: Array,
+    default: [],
+  },
+  stories: {
+    type: [Story.schema],
     default: [],
   },
   profile: {
