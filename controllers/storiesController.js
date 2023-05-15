@@ -75,6 +75,21 @@ const createStory = async (req, res) => {
     // save story in genre
     try {
       const result = await genre.save();
+      // save the story in the current user's stories array
+      const currentUserStories = await User.findOne({
+        username: req.body.author,
+      }).exec();
+      // dont push duplicate stories body to user
+      if (
+        !currentUserStories.stories.find(
+          (story) => story.body === req.body.body
+        )
+      ) {
+        currentUserStories.stories.push(story);
+      }
+      // save user
+      await currentUserStories.save();
+
       console.log(result);
     } catch (err) {
       console.error(err);
@@ -454,6 +469,13 @@ const deleteStory = async (req, res) => {
     {},
     { $pull: { stories: { _id: req.body.id, title: req.body.title } } }
   ).exec();
+
+  // delete story from the user's stories
+  const result2 = await User.updateMany(
+    {},
+    { $pull: { stories: { _id: req.body.id, title: req.body.title } } }
+  ).exec();
+
   res.status(200).json({
     message: `Story ${req.body.title} successfully deleted from all genres.`,
   });
