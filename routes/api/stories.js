@@ -32,10 +32,10 @@ router
   .route("/:genre")
   .get(storiesController.getAllStories)
 
-  .delete(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storiesController.deleteStoryGenre
-  );
+  // .delete(
+  //   verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
+  //   storiesController.deleteStoryGenre
+  // );
 
 router.route("/:genre/find").get(storiesController.getStory);
 
