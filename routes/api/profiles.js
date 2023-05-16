@@ -5,13 +5,9 @@ const profilesController = require("../../controllers/profilesController");
 const verifyRoles = require("../../middleware/verifyRoles");
 
 // global routes
+router.route("/").get(profilesController.getAllProfiles);
 // update profile
-router
-  .route("/:username")
-  .put(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.User),
-    profilesController.updateProfile
-  );
+router.route("/:username").put(profilesController.updateProfile);
 //   get profile
 router.route("/:username").get(profilesController.getProfile);
 
