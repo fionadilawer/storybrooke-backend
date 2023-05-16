@@ -41,21 +41,21 @@ const createStory = async (req, res) => {
     },
   }).exec();
 
-  const result = await Genre.findOne({
-    stories: {
-      $elemMatch: {
-        // 50% of the story already exists in the database
-        body: {
-          $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
-          $regex: story.body.slice(-Math.floor(story.body.length / 2)),
-          $regex: story.body.slice(
-            Math.floor(story.body.length / 4),
-            -Math.ceil(story.body.length / 4)
-          ),
-        },
-      },
-    },
-  }).exec();
+  // const result = await Genre.findOne({
+  //   stories: {
+  //     $elemMatch: {
+  //       // 50% of the story already exists in the database
+  //       body: {
+  //         $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
+  //         $regex: story.body.slice(-Math.floor(story.body.length / 2)),
+  //         $regex: story.body.slice(
+  //           Math.floor(story.body.length / 4),
+  //           -Math.ceil(story.body.length / 4)
+  //         ),
+  //       },
+  //     },
+  //   },
+  // }).exec();
 
   if (resultInStory) {
     return res.status(400).json({
@@ -63,7 +63,6 @@ const createStory = async (req, res) => {
     });
   }
 
-  //   find the genres and add the story to them
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
@@ -75,39 +74,58 @@ const createStory = async (req, res) => {
       i--;
       continue;
     }
+  }
 
-    // check if genres length is greater than 3
-    if (story.genres.length > 3) {
-      // remove anything after the 3rd index
-      story.genres.splice(3, story.genres.length - 3);
-    }
+  // check if genres length is greater than 3
+  if (story.genres.length > 3) {
+    // remove anything after the 3rd index
+    story.genres.splice(3, story.genres.length - 3);
+  }
 
-    // push story to story collection
-    const newStory = new Story(story);
-    // push story to genre
+  // push story to story collection
+  const newStory = new Story(story);
+  // push story to genre
+  for (let i = 0; i < story.genres.length; i++) {
+    const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
     genre.stories.push(newStory);
 
-    // save story in genre
-    try {
-      // save new story in story collection
-      await newStory.save();
-      // save new story in genre
-      const result = await genre.save();
-      // save the story in the current user's stories array
-      const currentUserStories = await User.findOne({
-        username: req.body.author,
-      }).exec();
-      // push story to user's stories array
-      currentUserStories.stories.push(newStory);
+    // save genre
+    await newStory.save();
+    await genre.save();
 
-      // save user
-      await currentUserStories.save();
+    // save story in user
+    const currentUserStories = await User.findOne({
+      username: req.body.author,
+    }).exec();
+    // push story to user's stories array
+    currentUserStories.stories.push(newStory);
 
-      console.log(result);
-    } catch (err) {
-      console.error(err);
-    }
+    // save user
+    await currentUserStories.save();
   }
+
+  // genre.stories.push(newStory);
+
+  // // save story in genre
+  // try {
+  //   // save new story in story collection
+  //   await newStory.save();
+  //   // save new story in genre
+  //   const result = await genre.save();
+  //   // save the story in the current user's stories array
+  //   const currentUserStories = await User.findOne({
+  //     username: req.body.author,
+  //   }).exec();
+  //   // push story to user's stories array
+  //   currentUserStories.stories.push(newStory);
+
+  //   // save user
+  //   await currentUserStories.save();
+
+  //   console.log(result);
+  // } catch (err) {
+  //   console.error(err);
+  // }
 
   // if by this point no genres are valid, return message
   if (story.genres.length === 0) {
