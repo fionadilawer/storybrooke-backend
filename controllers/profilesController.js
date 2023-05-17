@@ -183,12 +183,12 @@ const updateProfile = async (req, res) => {
         { $set: { author: updatedUserName } }
       ).exec();
 
-      // update the username in the stories in the user's genres array
+      // update the username in the stories in the genres stories array
       await Genre.updateMany(
         // find all stories with the old username
-        { "stories.author": newUserName },
-        // update the author field with the new username
-        { $set: { "stories.$.author": updatedUserName } }
+        { stories: { $elemMatch: { author: newUserName } } },
+        // replace all the old usernames with the new username
+        { $set: { "stories.$[].author": updatedUserName } }
       ).exec();
 
       // update the username in the stories in the user's stories array
