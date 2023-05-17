@@ -152,6 +152,13 @@ const updateProfile = async (req, res) => {
     dateJoined: profileExists.dateJoined,
   });
 
+  // if bio is more than 250 characters, return error
+  if (profile.bio.length > 250) {
+    return res.status(400).json({
+      message: "Bio cannot be more than 200 characters.",
+    });
+  }
+
   try {
     const result = await profile.save();
 
