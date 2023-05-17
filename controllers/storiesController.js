@@ -16,6 +16,21 @@ const createStory = async (req, res) => {
     date: new Date(),
   };
 
+  // capitalize the first letter of author
+  req.body.author =
+    req.body.author.charAt(0).toUpperCase() +
+    req.body.author.slice(1).toLowerCase();
+  story.author =
+    story.author.charAt(0).toUpperCase() + story.author.slice(1).toLowerCase();
+  // check if author exists in db
+  const verifyAuthor = await User.findOne({ username: story.author }).exec();
+
+  if (!verifyAuthor && story.author !== "Anonymous") {
+    return res.status(404).json({
+      message: `The author ${story.author} does not exist in the database. Please create an account and try again.`,
+    });
+  }
+
   // check if genre exists and update story by removing non-existent genres
 
   for (let i = 0; i < story.genres.length; i++) {
@@ -255,6 +270,24 @@ const updateStory = async (req, res) => {
       message: `All fields are required. Please enter the title, author, body, and genres.`,
     });
 
+  // capitalize author
+  req.body.author =
+    req.body.author.charAt(0).toUpperCase() +
+    req.body.author.slice(1).toLowerCase();
+  // uppercase title
+  const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
+
+  // check if author exists
+  const user = await User.findOne({ username: req.body.author }).exec();
+
+  if (!user && req.body.author !== "Anonymous") {
+    return res
+      .status(404)
+      .json({
+        message: `Author ${req.body.author} not found.`,
+      });
+  }
+
   // check if story exists in any genre in db
   const story = await Genre.findOne({
     stories: { $elemMatch: { _id: req?.params?.id } },
@@ -266,9 +299,6 @@ const updateStory = async (req, res) => {
       message: `Story ${newTitle} not found in the database.`,
     });
   }
-
-  const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
-
 
   // create the new story
   const newStory = {
