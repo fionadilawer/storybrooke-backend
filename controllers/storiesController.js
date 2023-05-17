@@ -156,6 +156,8 @@ const getStory = async (req, res) => {
   if (!req.body.title)
     return res.status(400).json({ message: "Title is required." });
 
+  req.body.title = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
+
   // check if genre exists
   const genre = await Genre.findOne({ genre: req.params.genre }).exec();
 
@@ -281,11 +283,9 @@ const updateStory = async (req, res) => {
   const user = await User.findOne({ username: req.body.author }).exec();
 
   if (!user && req.body.author !== "Anonymous") {
-    return res
-      .status(404)
-      .json({
-        message: `Author ${req.body.author} not found.`,
-      });
+    return res.status(404).json({
+      message: `Author ${req.body.author} not found.`,
+    });
   }
 
   // check if story exists in any genre in db
