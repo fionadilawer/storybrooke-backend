@@ -21,7 +21,7 @@ const ProfileSchema = new Schema({
   profilePicture: {
     type: String,
     default:
-      "https://res.cloudinary.com/dq7l8216n/image/upload/v1628584753/placeholder-profile-image_zqjz1h.png",
+      "https://www.w3schools.com/howto/img_avatar.png",
   },
   dateJoined: {
     type: Date,
