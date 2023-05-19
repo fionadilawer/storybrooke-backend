@@ -71,15 +71,15 @@ const updateProfile = async (req, res) => {
     });
   }
 
+  const { base64 } = req.body;
+
   // create new profile
   const profile = new Profile({
     firstname: profileExists.firstname,
     lastname: profileExists.lastname,
     username: updatedUserName ? updatedUserName : profileExists.username,
     bio: req.body.bio ? req.body.bio : profileExists.bio,
-    profilePicture: req.body.profilePicture
-      ? req.body.profilePicture
-      : profileExists.profilePicture,
+    profilePicture: base64 ? base64 : profileExists.profilePicture,
     dateJoined: profileExists.dateJoined,
   });
 
