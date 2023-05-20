@@ -91,15 +91,17 @@ const updateProfile = async (req, res) => {
   }
 
   // check if username has been taken by another user
-  const usernameTaken = await User.findOne({
-    username: profile.updatedUserName,
+ if(profile.username !== profileExists.username) {
+  const userNameExists = await User.findOne({
+    username: profile.username,
   }).exec();
 
-  if (usernameTaken) {
+  if (userNameExists) {
     return res.status(400).json({
-      message: `Username ${profile.updatedUserName} is already taken.`,
+      message: `Username ${profile.username} has been taken. Please choose another username.`,
     });
   }
+ }
 
   // delete old profile
   await Profile.findOneAndDelete({ username: newUserName }).exec();
