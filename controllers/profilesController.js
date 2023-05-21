@@ -86,22 +86,29 @@ const updateProfile = async (req, res) => {
   // if bio is more than 250 characters, return error
   if (profile.bio.length > 250) {
     return res.status(400).json({
-      message: "Bio cannot be more than 200 characters.",
+      message: "Bio cannot be more than 250 characters",
+    });
+  }
+
+  // if bios is less than 50 characters, return error
+  if (profile.bio.length < 100) {
+    return res.status(400).json({
+      message: "Bio cannot be less than 100 characters",
     });
   }
 
   // check if username has been taken by another user
- if(profile.username !== profileExists.username) {
-  const userNameExists = await User.findOne({
-    username: profile.username,
-  }).exec();
+  if (profile.username !== profileExists.username) {
+    const userNameExists = await User.findOne({
+      username: profile.username,
+    }).exec();
 
-  if (userNameExists) {
-    return res.status(400).json({
-      message: `Username ${profile.username} has been taken. Please choose another username.`,
-    });
+    if (userNameExists) {
+      return res.status(400).json({
+        message: `Username ${profile.username} has been taken. Please choose another username`,
+      });
+    }
   }
- }
 
   // delete old profile
   await Profile.findOneAndDelete({ username: newUserName }).exec();
