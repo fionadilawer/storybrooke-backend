@@ -80,6 +80,7 @@ const updateProfile = async (req, res) => {
     username: updatedUserName ? updatedUserName : profileExists.username,
     bio: req.body.bio ? req.body.bio : profileExists.bio,
     profilePicture: base64 ? base64 : profileExists.profilePicture,
+    coverPicture: req.body.coverPicture ? req.body.coverPicture : profileExists.coverPicture,
     dateJoined: profileExists.dateJoined,
   });
 
