@@ -73,6 +73,9 @@ const updateProfile = async (req, res) => {
 
   const { base64 } = req.body;
 
+  // get date from old profile
+  const dateJoined = profileExists.profile.dateJoined;
+
   // create new profile
   const profile = new Profile({
     firstname: profileExists.firstname,
@@ -80,8 +83,10 @@ const updateProfile = async (req, res) => {
     username: updatedUserName ? updatedUserName : profileExists.username,
     bio: req.body.bio ? req.body.bio : profileExists.bio,
     profilePicture: base64 ? base64 : profileExists.profilePicture,
-    coverPicture: req.body.coverPicture ? req.body.coverPicture : profileExists.coverPicture,
-    dateJoined: profileExists.dateJoined,
+    coverPicture: req.body.coverPicture
+      ? req.body.coverPicture
+      : profileExists.coverPicture,
+    dateJoined: dateJoined,
   });
 
   // if bio is more than 250 characters, return error
