@@ -12,7 +12,7 @@ const handleLogin = async (req, res) => {
       .status(400)
       .json({ message: "Username and password are required" });
   // check if user exists
-  const foundUser = await User.findOne({ username: user.charAt(0).toUpperCase() + user.slice(1) }).exec();
+  const foundUser = await User.findOne({ username: user.charAt(0).toUpperCase() + user.slice(1).toLowerCase()}).exec();
 
   if (!foundUser) return res.sendStatus(404); // not found
   // check if password is correct

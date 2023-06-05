@@ -4,6 +4,7 @@ const app = express();
 const path = require("path");
 const cors = require("cors");
 const mongoose = require("mongoose");
+var bodyParser = require('body-parser');
 const errorHandler = require("./middleware/errorHandler");
 const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./middleware/verifyJWT");
@@ -14,6 +15,12 @@ const port = process.env.PORT || 4000;
 
 // connect to MongoDB
 connectDB();
+
+// body parser
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
 // custom middleware
 app.use((req, res, next) => {
@@ -52,6 +59,7 @@ app.use("/users", require("./routes/api/users"));
 app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
 app.use("/story", require("./routes/api/stories"));
+app.use("/profile", require("./routes/api/profiles"));
 
 // handle 404
 app.all("*", (req, res) => {
