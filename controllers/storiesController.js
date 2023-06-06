@@ -128,7 +128,7 @@ const createStory = async (req, res) => {
 };
 
 // GET ALL STORIES IN A GENRE
-const getAllStories = async (req, res) => {
+const getAllStoriesInGenre = async (req, res) => {
   const genre = await Genre.findOne({ genre: req.params.genre }).exec();
 
   if (!genre) {
@@ -180,7 +180,7 @@ const getStory = async (req, res) => {
 };
 
 // GET ALL STORIES WITH  THE SAME TITLE IN THE DATABASE
-const getStoryAllGenres = async (req, res) => {
+const getStoryGlobal = async (req, res) => {
   // find stories with both uppercase and lowercase titles, capitalized titles and titles with each word capitalized
   const newTitle = req?.params?.title
     .toUpperCase()
@@ -202,6 +202,23 @@ const getStoryAllGenres = async (req, res) => {
 
   res.status(200).json(stories);
 };
+
+// GET STORY BY ID
+const getStoryById = async (req, res) => {
+  // check if id params is empty
+  if (!req?.params?.id) {
+    return res.status(400).json({ message: "Id is required." });
+  }
+
+  // check if story exists
+  const story = await Story.findOne({ _id: req?.params?.id }).exec();
+
+  if (!story) {
+    return res.status(404).json({ message: `Story not found.` });
+  }
+
+  res.status(200).json(story);
+}
 
 // GET ALL STORIES WRITTEN BY THE SAME AUTHOR IN THE DATABASE
 const getStoriesByAuthor = async (req, res) => {
@@ -554,13 +571,14 @@ const deleteStory = async (req, res) => {
 
 module.exports = {
   createStory,
-  getAllStories,
+  getAllStoriesInGenre,
   getStory,
   updateStory,
   deleteStory,
-  getStoryAllGenres,
+  getStoryGlobal,
   getAllStoriesGlobal,
   // deleteStoryGenre,
   countStoriesGlobal,
   getStoriesByAuthor,
+  getStoryById
 };
