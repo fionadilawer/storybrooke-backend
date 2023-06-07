@@ -470,46 +470,87 @@ const countStoriesGlobal = async (req, res) => {
 };
 
 // DELETE A STORY GLOBALLY
-const deleteStory = async (req, res) => {
-  // check if no id and title provided
-  if (!req.body.title || !req.body.id) {
-    return res.status(400).json({ message: "Title and id are required." });
-  }
+// const deleteStory = async (req, res) => {
+//   // check if no id and title provided
+//   if (!req.body.title || !req.body.id) {
+//     return res.status(400).json({ message: "Title and id are required." });
+//   }
 
-  const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
+//   const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
+
+//   // check if story exists in db
+//   const story = await Story.findOne({
+//     _id: req.body.id,
+//     title: newTitle,
+//   }).exec();
+
+//   if (!story) {
+//     return res.status(404).json({ message: `Story ${newTitle} not found.` });
+//   }
+
+//   // if id and title belong to the same story remove it from the db
+//   const result = await Story.deleteOne({
+//     _id: req.body.id,
+//     title: newTitle,
+//   }).exec();
+
+//   // delete story from the user's stories
+//   const result2 = await User.updateMany(
+//     {},
+//     { $pull: { stories: { _id: req.body.id, title: newTitle } } }
+//   ).exec();
+
+//   // delete story from all genres
+//   const result3 = await Genre.updateMany(
+//     {},
+//     { $pull: { stories: { _id: req.body.id, title: newTitle } } }
+//   ).exec();
+
+//   res.status(200).json({
+//     message: `Story ${newTitle} successfully deleted.`,
+//   });
+// };
+
+
+const deleteStory = async (req, res) => {
+  // check if no id is provided
+  if (!req?.params?.id) {
+    return res.status(400).json({ message: "Id is required." });
+  }
 
   // check if story exists in db
   const story = await Story.findOne({
-    _id: req.body.id,
-    title: newTitle,
+    _id: req?.params?.id,
   }).exec();
 
   if (!story) {
-    return res.status(404).json({ message: `Story ${newTitle} not found.` });
+    return res.status(404).json({ message: `Story not found.` });
   }
 
-  // if id and title belong to the same story remove it from the db
+  // remove story from the db
   const result = await Story.deleteOne({
-    _id: req.body.id,
-    title: newTitle,
+    _id: req?.params?.id,
   }).exec();
 
   // delete story from the user's stories
   const result2 = await User.updateMany(
     {},
-    { $pull: { stories: { _id: req.body.id, title: newTitle } } }
+    { $pull: { stories: { _id: req?.params?.id } } }
   ).exec();
 
   // delete story from all genres
   const result3 = await Genre.updateMany(
     {},
-    { $pull: { stories: { _id: req.body.id, title: newTitle } } }
+    { $pull: { stories: { _id: req?.params?.id } } }
   ).exec();
 
   res.status(200).json({
-    message: `Story ${newTitle} successfully deleted.`,
+    message: `Story successfully deleted.`,
   });
 };
+
+
+
 
 // DELETE A STORY FROM A GENRE
 // const deleteStoryGenre = async (req, res) => {
