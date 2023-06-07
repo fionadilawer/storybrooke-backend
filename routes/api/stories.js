@@ -11,10 +11,10 @@ router
 
   .post(storiesController.createStory)
 
-  .delete(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    storiesController.deleteStory
-  )
+  // .delete(
+  //   // verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
+  //   storiesController.deleteStory
+  // )
 
   .get(storiesController.getAllStoriesGlobal);
 
@@ -26,6 +26,10 @@ router
   .put(
     // verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     storiesController.updateStory
+  )
+  .delete(
+    // verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
+    storiesController.deleteStory
   )
 
   // get story from the database by ID
