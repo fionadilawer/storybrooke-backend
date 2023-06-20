@@ -1,4 +1,7 @@
 const User = require("../model/User");
+const Story = require("../model/Story");
+const Profile = require("../model/Profile");
+const Genre = require("../model/Genre");
 const bcrypt = require("bcrypt");
 
 const getAllUsers = async (req, res) => {
@@ -34,18 +37,49 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  if (!req?.body?.id)
-    return res.status(400).json({ message: "User ID required" });
-  const user = await User.findOne({ _id: req.body.id }).exec();
-  if (!user) {
+  if (!req?.params?.username)
+    return res.status(400).json({ message: "Username required." });
+
+  // capitalize username
+  req.params.username =
+    req.params.username.charAt(0).toUpperCase() +
+    req.params.username.slice(1).toLowerCase();
+
+  // Find user
+  const user = await User.findOne({ username: req.params.username }).exec();
+
+  if (!user)
     return res
-      .status(204)
-      .json({ message: `User ID ${req.body.id} not found` });
-  }
-  const result = await user.deleteOne({ _id: req.body.id });
-  res.json(result);
+      .status(404)
+      .json({ message: `No user matches username ${req.params.username}.` });
+
+  // Delete user
+  const deletedUser = await User.deleteOne({
+    username: user.username,
+  }).exec();
+
+  // Delete user's profile
+  const deletedProfile = await Profile.deleteOne({
+    username: user.username,
+  }).exec();
+
+  // Delete user's stories
+  const deletedStories = await Story.deleteMany({
+    author: user.username,
+  }).exec();
+
+  // delete stories from genres
+  const deletedGenres = await Genre.updateMany(
+    { stories: { $elemMatch: { author: user.username } } },
+    { $pull: { stories: { author: user.username } } }
+  ).exec();
+
+  res.status(200).json({
+    message: `User ${req.params.username} deleted.`,
+  });
 };
 
+// GET USER
 const getUser = async (req, res) => {
   if (!req?.params?.id)
     return res.status(400).json({ message: "User ID required." });
