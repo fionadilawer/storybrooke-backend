@@ -59,23 +59,6 @@ const createNewGenre = async (req, res) => {
   }
 };
 
-// GET genre
-// const getGenre = async (req, res) => {
-//   if (!req?.params?.id)
-//     return res.status(400).json({ message: "ID parameter is required." });
-
-//   const genre = await Genre.findOne({
-//     _id: req.params.id,
-//   }).exec();
-
-//   if (!genre) {
-//     return res.status(204).json({
-//       message: `No genre matches ID ${req.params.id}.`,
-//     });
-//   }
-//   res.json(genre);
-// };
-
 // Get genre by name
 const getGenre = async (req, res) => {
   if (!req?.body?.genre)
