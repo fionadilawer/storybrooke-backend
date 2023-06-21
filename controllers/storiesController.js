@@ -218,7 +218,7 @@ const getStoryById = async (req, res) => {
   }
 
   res.status(200).json(story);
-}
+};
 
 // GET ALL STORIES WRITTEN BY THE SAME AUTHOR IN THE DATABASE
 const getStoriesByAuthor = async (req, res) => {
@@ -233,10 +233,6 @@ const getStoriesByAuthor = async (req, res) => {
 
   // check if author exists
   const user = await User.findOne({ username: author }).exec();
-
-  // if (!user) {
-  //   return res.status(404).json({ message: `Author ${author} not found.` });
-  // }
 
   // check if author has published any stories
   const stories = await Story.find({ author: author }).exec();
@@ -373,20 +369,6 @@ const updateStory = async (req, res) => {
     }
   }
 
-  // check if any of the remaining genres already have the story title
-  // for (let i = 0; i < newStory.genres.length; i++) {
-  //   const genre = await Genre.findOne({
-  //     genre: newStory.genres[i],
-  //     stories: { $elemMatch: { title: newStory.title } },
-  //   }).exec();
-
-  //   if (genre) {
-  //     newStory.genres.splice(i, 1);
-  //     i--;
-  //     continue;
-  //   }
-  // }
-
   // check if genres length is greater than 3
   if (newStory.genres.length > 3) {
     // remove anything after the 3rd index
@@ -469,49 +451,7 @@ const countStoriesGlobal = async (req, res) => {
   res.status(200).json({ count: stories.length });
 };
 
-// DELETE A STORY GLOBALLY
-// const deleteStory = async (req, res) => {
-//   // check if no id and title provided
-//   if (!req.body.title || !req.body.id) {
-//     return res.status(400).json({ message: "Title and id are required." });
-//   }
-
-//   const newTitle = req.body.title.toUpperCase().trim().split(/ +/).join(" ");
-
-//   // check if story exists in db
-//   const story = await Story.findOne({
-//     _id: req.body.id,
-//     title: newTitle,
-//   }).exec();
-
-//   if (!story) {
-//     return res.status(404).json({ message: `Story ${newTitle} not found.` });
-//   }
-
-//   // if id and title belong to the same story remove it from the db
-//   const result = await Story.deleteOne({
-//     _id: req.body.id,
-//     title: newTitle,
-//   }).exec();
-
-//   // delete story from the user's stories
-//   const result2 = await User.updateMany(
-//     {},
-//     { $pull: { stories: { _id: req.body.id, title: newTitle } } }
-//   ).exec();
-
-//   // delete story from all genres
-//   const result3 = await Genre.updateMany(
-//     {},
-//     { $pull: { stories: { _id: req.body.id, title: newTitle } } }
-//   ).exec();
-
-//   res.status(200).json({
-//     message: `Story ${newTitle} successfully deleted.`,
-//   });
-// };
-
-
+// DELETE STORY GLOBALLY
 const deleteStory = async (req, res) => {
   // check if no id is provided
   if (!req?.params?.id) {
@@ -549,67 +489,6 @@ const deleteStory = async (req, res) => {
   });
 };
 
-
-
-
-// DELETE A STORY FROM A GENRE
-// const deleteStoryGenre = async (req, res) => {
-//   // check if empty
-//   if (!req.body.title)
-//     return res.status(400).json({ message: "Title is required." });
-
-//   // check if genre exists
-//   const genre = await Genre.findOne({ genre: req.params.genre }).exec();
-
-//   if (!genre) {
-//     return res
-//       .status(404)
-//       .json({ message: `Genre ${req.params.genre} not found.` });
-//   }
-
-//   // check if story exists
-//   const story = genre.stories.find((story) => story.title === req.body.title);
-
-//   if (!story) {
-//     return res
-//       .status(404)
-//       .json({ message: `Story ${req.body.title} not found.` });
-//   }
-
-//   // remove story from genre
-//   const result = await Genre.updateOne(
-//     { genre: req.params.genre },
-//     { $pull: { stories: { title: req.body.title } } }
-//   ).exec();
-
-//   await Genre.updateMany(
-//     { stories: { $elemMatch: { title: req.body.title } } },
-//     { $pull: { genres: req.params.genre } }
-//   ).exec();
-
-//   res.status(200).json(result);
-
-//   // remove genre from story
-
-//   // check if story exists in any genre
-//   const storyGenre = await Genre.findOne({
-//     stories: { $elemMatch: { title: req.body.title } },
-//   }).exec();
-
-//   if (!storyGenre) return;
-
-//   // update story to remove genre from genres array in story object
-//   const storyUpdate = storyGenre.stories.find(
-//     (story) => story.title === req.body.title
-//   );
-
-//   storyUpdate.genres = storyUpdate.genres.filter(
-//     (genre) => genre !== req.params.genre
-//   );
-
-//   await storyGenre.save();
-// };
-
 module.exports = {
   createStory,
   getAllStoriesInGenre,
@@ -618,8 +497,7 @@ module.exports = {
   deleteStory,
   getStoryGlobal,
   getAllStoriesGlobal,
-  // deleteStoryGenre,
   countStoriesGlobal,
   getStoriesByAuthor,
-  getStoryById
+  getStoryById,
 };
