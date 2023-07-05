@@ -12,7 +12,7 @@ const StorySchema = new Schema({
     default: "Anonymous", 
   },
   body: {
-    type: String,
+    type: [String],
     required: true,
   },
   genres: {

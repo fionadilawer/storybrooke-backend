@@ -45,14 +45,27 @@ const createStory = async (req, res) => {
   // check the story for plagiarism (i.e. check if a large chunk of the story already exists in the database)
 
   // story collection
+  // const resultInStory = await Story.findOne({
+  //   body: {
+  //     $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
+  //     $regex: story.body.slice(-Math.floor(story.body.length / 2)),
+  //     $regex: story.body.slice(
+  //       Math.floor(story.body.length / 4),
+  //       -Math.ceil(story.body.length / 4)
+  //     ),
+  //   },
+  // }).exec();
+
   const resultInStory = await Story.findOne({
     body: {
-      $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
-      $regex: story.body.slice(-Math.floor(story.body.length / 2)),
-      $regex: story.body.slice(
-        Math.floor(story.body.length / 4),
-        -Math.ceil(story.body.length / 4)
-      ),
+      $in: [
+        ...story.body.slice(0, Math.floor(story.body.length / 2)),
+        ...story.body.slice(-Math.floor(story.body.length / 2)),
+        ...story.body.slice(
+          Math.floor(story.body.length / 4),
+          -Math.ceil(story.body.length / 4)
+        ),
+      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
     },
   }).exec();
 
@@ -65,7 +78,7 @@ const createStory = async (req, res) => {
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-    console.log(genre);
+    // console.log(genre);
     // check if story title exists in the genre
     if (genre.stories.find((story) => story.title === newTitle)) {
       // remove the genre from the story's genres array
@@ -255,7 +268,7 @@ const getStoriesByAuthor = async (req, res) => {
 
   // if no user found in database
   if (!user && author !== "Anonymous") {
-    console.log(`User ${author} not found`);
+    // console.log(`User ${author} not found`);
     return res.status(404).json({ message: `User ${author} not found` });
   }
 
@@ -324,15 +337,19 @@ const updateStory = async (req, res) => {
   };
 
   // check if the new story story body already exists in the db with a different id
-
-  const storyExists = await Genre.findOne({
-    stories: {
-      $elemMatch: {
-        body: newStory.body,
-        _id: { $ne: req?.params?.id },
-      },
+  const storyExists = await Story.findOne({
+    body: {
+      $in: [
+        ...newStory.body.slice(0, Math.floor(newStory.body.length / 2)),
+        ...newStory.body.slice(-Math.floor(newStory.body.length / 2)),
+        ...newStory.body.slice(
+          Math.floor(newStory.body.length / 4),
+          -Math.ceil(newStory.body.length / 4)
+        ),
+      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
     },
-  }).exec();
+    _id: { $ne: req?.params?.id },
+  });
 
   if (storyExists) {
     return res.status(400).json({
