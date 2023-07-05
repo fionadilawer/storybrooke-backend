@@ -78,7 +78,7 @@ const createStory = async (req, res) => {
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-    console.log(genre);
+    // console.log(genre);
     // check if story title exists in the genre
     if (genre.stories.find((story) => story.title === newTitle)) {
       // remove the genre from the story's genres array
@@ -268,7 +268,7 @@ const getStoriesByAuthor = async (req, res) => {
 
   // if no user found in database
   if (!user && author !== "Anonymous") {
-    console.log(`User ${author} not found`);
+    // console.log(`User ${author} not found`);
     return res.status(404).json({ message: `User ${author} not found` });
   }
 

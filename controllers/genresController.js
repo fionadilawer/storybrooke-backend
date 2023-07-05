@@ -100,7 +100,7 @@ const deleteGenre = async (req, res) => {
 
   try {
     const result = await Genre.deleteOne({ _id: req.body.id });
-    console.log(result);
+    // console.log(result);
     res.status(200).json({
       message: `Genre ${genre.genre} has been successfully deleted.`,
     });

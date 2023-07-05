@@ -41,7 +41,7 @@ const handleNewUser = async (req, res) => {
     // save profile to profile collection
     await Profile.create(profile);
 
-    console.log(result);
+    // console.log(result);
 
     res
       .status(201)
