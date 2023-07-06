@@ -11,8 +11,7 @@ const verifyJWT = require("./middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
 const connectDB = require("./config/dbConn");
-// const port = process.env.PORT || 4000;
-const port = process.env.PORT;
+const port = process.env.PORT || 4000;
 
 // connect to MongoDB
 connectDB();
