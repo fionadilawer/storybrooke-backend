@@ -8,10 +8,9 @@ const verifyRoles = require("../../middleware/verifyRoles");
 router
   .route("/")
 
-  .post(storiesController.createStory)
+  .post(storiesController.createStory);
 
-  // .get(storiesController.getAllStoriesGlobal);
-
+// .get(storiesController.getAllStoriesGlobal);
 
 // SPECIFIC ROUTES
 router
@@ -37,6 +36,6 @@ router.route("/author/:author").get(storiesController.getStoriesByAuthor);
 router.route("/find/:genre").get(storiesController.getAllStoriesInGenre);
 
 // get all stories global
-router.route("/all").get(storiesController.getAllStoriesGlobal);
+router.route("/stories").get(storiesController.getAllStoriesGlobal);
 
 module.exports = router;
