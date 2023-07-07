@@ -12,6 +12,9 @@ router
 
 // .get(storiesController.getAllStoriesGlobal);
 
+// get all stories global
+router.route("/stories").get(storiesController.getAllStoriesGlobal);
+
 // SPECIFIC ROUTES
 router
   .route("/:id")
@@ -35,7 +38,5 @@ router.route("/author/:author").get(storiesController.getStoriesByAuthor);
 // get all stories in a genre
 router.route("/find/:genre").get(storiesController.getAllStoriesInGenre);
 
-// get all stories global
-router.route("/stories").get(storiesController.getAllStoriesGlobal);
 
 module.exports = router;
