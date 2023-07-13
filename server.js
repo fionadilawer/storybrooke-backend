@@ -54,7 +54,6 @@ app.use("/logout", require("./routes/logout"));
 
 // verify JWT
 app.use(verifyJWT);
-app.use("/employees", require("./routes/api/employees"));
 app.use("/users", require("./routes/api/users"));
 app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
