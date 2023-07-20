@@ -44,18 +44,6 @@ const createStory = async (req, res) => {
 
   // check the story for plagiarism (i.e. check if a large chunk of the story already exists in the database)
 
-  // story collection
-  // const resultInStory = await Story.findOne({
-  //   body: {
-  //     $regex: story.body.slice(0, Math.floor(story.body.length / 2)),
-  //     $regex: story.body.slice(-Math.floor(story.body.length / 2)),
-  //     $regex: story.body.slice(
-  //       Math.floor(story.body.length / 4),
-  //       -Math.ceil(story.body.length / 4)
-  //     ),
-  //   },
-  // }).exec();
-
   const resultInStory = await Story.findOne({
     body: {
       $in: [
@@ -130,13 +118,11 @@ const createStory = async (req, res) => {
   if (story.genres.length === 0) {
     return res.status(400).json({
       message: `It appears that none of the genres you specified were valid options. The most likely reason is that the title of the story you're trying to add already exists in the genres you specified. Please change the title or the genres and try again.`,
-      // message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
     });
   }
 
   res.status(201).json({
     message: `The story ${story.title} has been successfully published in genres ${story.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
-    // message: `Story ${story.title} created in genres ${story.genres}. Exceptions: 1. If the story's title already exists in a specified genre or a genre simply doesn't exist, the story will not be added to the specified genres. 2. Moreover, if the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. Also, it creates less confusion for the user if a specific genre does not have multiple stories with the same title. Thank you for your understanding.`,
   });
 };
 
@@ -396,7 +382,6 @@ const updateStory = async (req, res) => {
   if (newStory.genres.length === 0) {
     return res.status(400).json({
       message: `It appears that none of the genres you specified were valid options. The most likely reason is that the title of the story you're trying to add already exists in the genres you specified. Please change the title or the genres and try again.`,
-      // message: `It appears that none of the genres you specified were valid options. Please go through the following exceptions to understand what went wrong Exceptions: 1. A genre is not allowed to have multiple similar titles for a story as this creates confusion for the user. Please change the title of the story and try again. 2. If the story's content already exists in the database, the story will not be added to any genre. We encourage originality and creativity. Therefore, each story must be unique. While titles can be shared across genres, the content must be unique. 3. If the genre you specified does not exist, the story will not be added to that genre. Please check the spelling of the genre and try again. Thank you for your understanding.`,
     });
   }
 
