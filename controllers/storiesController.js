@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Genre = require("../model/Genre");
 const User = require("../model/User");
 const Story = require("../model/Story");
+const Comment = require("../model/Comment");
 
 // CREATE A NEW STORY
 const createStory = async (req, res) => {
@@ -485,6 +486,14 @@ const deleteStory = async (req, res) => {
     {},
     { $pull: { stories: { _id: req?.params?.id } } }
   ).exec();
+
+  // delete all comments associated with the story
+  const comments = story.comments;
+
+  // delete all comments from the db
+  const result4 = await Comment.deleteMany({
+    _id: { $in: comments },
+  }).exec();
 
   res.status(200).json({
     message: `Story successfully deleted.`,
