@@ -3,7 +3,7 @@ const Story = require("../model/Story");
 const Genre = require("../model/Genre");
 const User = require("../model/User");
 
-// Create a new comment
+// CREATE A NEW COMMENT
 const createComment = async (req, res) => {
   // check if no params
   if (!req?.params?.id) {
@@ -21,7 +21,9 @@ const createComment = async (req, res) => {
     return;
   }
 
-  const commenter = req.body.commenter;
+  const commenter =
+    req.body.commenter.charAt(0).toUpperCase() +
+    req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
   const date = new Date();
 
@@ -50,6 +52,7 @@ const createComment = async (req, res) => {
 
   //   save comment
   try {
+    await newComment.save();
     //   add comment to story
     story.comments.push(newComment);
     //   save story
@@ -76,6 +79,76 @@ const createComment = async (req, res) => {
   }
 };
 
+// GET ALL COMMENTS FOR A STORY
+const getComments = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No story id provided" });
+    return;
+  }
+
+  //   get story id from params
+  const storyId = req?.params?.id;
+
+  //   check if story id is valid
+  const story = await Story.findOne({ _id: storyId });
+  if (!story) {
+    res.status(404).json({ message: "Story not found" });
+    return;
+  }
+
+  //   get comments
+  const comments = story.comments;
+
+  //   send response
+  res.status(200).json(comments);
+};
+
+// DELETE A COMMENT
+const deleteComment = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  //   get comment id from params
+  const commentId = req?.params?.id;
+
+  //   check if comment id is valid
+  const comment = await Comment.findOne({ _id: commentId });
+
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  //   delete comment
+  try {
+    await Comment.deleteOne({ _id: commentId });
+    await Story.updateOne(
+      { comments: { $elemMatch: { _id: commentId } } },
+      { $pull: { comments: { _id: commentId } } }
+    ).exec();
+
+    await Genre.updateMany(
+      { "stories.comments": { $elemMatch: { _id: commentId } } },
+      { $pull: { "stories.$.comments": { _id: commentId } } }
+    ).exec();
+
+    await User.updateMany(
+      { "stories.comments": { $elemMatch: { _id: commentId } } },
+      { $pull: { "stories.$.comments": { _id: commentId } } }
+    ).exec();
+
+    res.status(200).json({ message: "Comment deleted" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createComment,
+  getComments,
+  deleteComment,
 };
