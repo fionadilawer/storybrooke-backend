@@ -54,7 +54,7 @@ const createStory = async (req, res) => {
           Math.floor(story.body.length / 4),
           -Math.ceil(story.body.length / 4)
         ),
-      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
+      ],
     },
   }).exec();
 
@@ -296,11 +296,22 @@ const updateStory = async (req, res) => {
   }
 
   // check if story exists in any genre in db
-  const story = await Genre.findOne({
-    stories: { $elemMatch: { _id: req?.params?.id } },
+  // const story = await Genre.findOne({
+  //   stories: { $elemMatch: { _id: req?.params?.id } },
+  // }).exec();
+
+  // // if story doesn't exist
+  // if (!story) {
+  //   return res.status(404).json({
+  //     message: `Story ${newTitle} not found in the database.`,
+  //   });
+  // }
+
+  // check if story exists
+  const story = await Story.findOne({
+    _id: req?.params?.id,
   }).exec();
 
-  // if story doesn't exist
   if (!story) {
     return res.status(404).json({
       message: `Story ${newTitle} not found in the database.`,
@@ -327,7 +338,7 @@ const updateStory = async (req, res) => {
           Math.floor(newStory.body.length / 4),
           -Math.ceil(newStory.body.length / 4)
         ),
-      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
+      ], // .filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
     },
     _id: { $ne: req?.params?.id },
   });
@@ -353,14 +364,31 @@ const updateStory = async (req, res) => {
       i--;
       continue;
     }
+  }
 
-    // check if any of the remaining genres already have the story title
-    const storyExists = await Genre.findOne({
-      genre: newStory.genres[i],
-      stories: { $elemMatch: { title: newStory.newTitle } },
-    }).exec();
+  // check if any of the remaining genres already have the story title
+  // const storyExists = await Genre.findOne({
+  //   genre: newStory.genres[i],
+  //   stories: {
+  //     $elemMatch: { title: newStory.newTitle, author: newStory.author },
+  //   },
+  // }).exec();
 
-    if (storyExists) {
+  // if (storyExists) {
+  //   newStory.genres.splice(i, 1);
+  //   i--;
+  //   continue;
+  // }
+
+  // check if story title exists in the genre
+  for (let i = 0; i < newStory.genres.length; i++) {
+    const genre = await Genre.findOne({ genre: newStory.genres[i] }).exec();
+    if (
+      genre.stories.find(
+        (story) => story.title === newTitle && story.author === req.body.author
+      )
+    ) {
+      // remove the genre from the story's genres array
       newStory.genres.splice(i, 1);
       i--;
       continue;
