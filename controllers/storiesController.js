@@ -67,7 +67,6 @@ const createStory = async (req, res) => {
   for (let i = 0; i < req.body.genres.length; i++) {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-    // console.log(genre);
     // check if story title exists in the genre
     if (genre.stories.find((story) => story.title === newTitle)) {
       // remove the genre from the story's genres array
@@ -83,43 +82,34 @@ const createStory = async (req, res) => {
     story.genres.splice(3, story.genres.length - 3);
   }
 
-  // push story to story collection
-  const newStory = new Story(story);
-  // push story to genre
-  for (let i = 0; i < story.genres.length; i++) {
-    const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
-    // genre.stories.unshift(newStory);
-    genre.stories.push(newStory);
-
-    // save genre
-    await newStory.save();
-    await genre.save();
-
-    // save story in user
-    const currentUserStories = await User.findOne({
-      username: req.body.author,
-    }).exec();
-
-    // push story to user's stories array (if the body doesn't already exist)
-    if (currentUserStories) {
-      if (
-        !currentUserStories.stories.find(
-          (story) => story.body === newStory.body
-        )
-      ) {
-        currentUserStories.stories.push(newStory);
-      }
-
-      // save user
-      await currentUserStories.save();
-    }
-  }
-
   // if by this point no genres are valid, return message
   if (story.genres.length === 0) {
     return res.status(400).json({
       message: `It appears that none of the genres you specified were valid options. The most likely reason is that the title of the story you're trying to add already exists in the genres you specified. Please change the title or the genres and try again.`,
     });
+  }
+
+  // push story to story collection
+  const newStory = new Story(story);
+  await newStory.save();
+
+  // push story to user's collection, stories array
+  const user = await User.findOne({
+    username: req.body.author,
+  }).exec();
+
+  if (user) {
+    user.stories.push(newStory);
+    await user.save();
+  }
+
+  // push genre collection
+  for (let i = 0; i < story.genres.length; i++) {
+    const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
+    genre.stories.push(newStory);
+
+    // save genre
+    await genre.save();
   }
 
   res.status(201).json({
