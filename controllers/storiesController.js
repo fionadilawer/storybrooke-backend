@@ -68,7 +68,11 @@ const createStory = async (req, res) => {
     // find genre in db
     const genre = await Genre.findOne({ genre: story.genres[i] }).exec();
     // check if story title exists in the genre
-    if (genre.stories.find((story) => story.title === newTitle)) {
+    if (
+      genre.stories.find(
+        (story) => story.title === newTitle && story.author === req.body.author
+      )
+    ) {
       // remove the genre from the story's genres array
       story.genres.splice(i, 1);
       i--;
