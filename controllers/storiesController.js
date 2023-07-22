@@ -54,7 +54,7 @@ const createStory = async (req, res) => {
           Math.floor(story.body.length / 4),
           -Math.ceil(story.body.length / 4)
         ),
-      ],
+      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
     },
   }).exec();
 
@@ -338,7 +338,7 @@ const updateStory = async (req, res) => {
           Math.floor(newStory.body.length / 4),
           -Math.ceil(newStory.body.length / 4)
         ),
-      ], // .filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
+      ].filter((paragraph) => paragraph.trim() !== ""), // Remove empty paragraphs
     },
     _id: { $ne: req?.params?.id },
   });
