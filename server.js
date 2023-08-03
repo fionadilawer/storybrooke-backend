@@ -43,11 +43,7 @@ app.use(credentials);
 // app.use(cors({credentials: true, origin: corsOptions}));
 // app.use(cors());
 // app.use(cors({credentials: true, origin: true}));
-app.use(cors({ credentials: true }), (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  next();
-  console.log("CORS enabled");
-});
+app.use(cors(), { credentials: true});
 
 // Middleware to handle static files
 app.use(express.static(path.join(__dirname, "/public")));
