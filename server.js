@@ -40,8 +40,9 @@ app.use(cookieParser());
 app.use(credentials);
 
 // Middleware to handle cors - cross origin resource sharing
-app.use(cors({credentials: true, origin: corsOptions}));
+// app.use(cors({credentials: true, origin: corsOptions}));
 // app.use(cors());
+app.use(cors({credentials: true, origin: true}));
 
 // Middleware to handle static files
 app.use(express.static(path.join(__dirname, "/public")));
