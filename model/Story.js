@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Comment = require("./Comment");
 
 const StorySchema = new Schema({
   title: {
@@ -24,6 +25,9 @@ const StorySchema = new Schema({
     default: new Date(),
     required: true,
   },
+  comments: {
+    type: [Comment.schema],
+  }
 });
 
 module.exports = mongoose.model("Story", StorySchema);
