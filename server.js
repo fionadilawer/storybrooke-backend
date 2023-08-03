@@ -42,7 +42,12 @@ app.use(credentials);
 // Middleware to handle cors - cross origin resource sharing
 // app.use(cors({credentials: true, origin: corsOptions}));
 // app.use(cors());
-app.use(cors({credentials: true, origin: true}));
+// app.use(cors({credentials: true, origin: true}));
+app.use(cors({ credentials: true }), (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+  console.log("CORS enabled");
+});
 
 // Middleware to handle static files
 app.use(express.static(path.join(__dirname, "/public")));
