@@ -40,10 +40,8 @@ app.use(cookieParser());
 app.use(credentials);
 
 // Middleware to handle cors - cross origin resource sharing
-// app.use(cors({credentials: true, origin: corsOptions}));
+app.use(cors({credentials: true, origin: corsOptions}));
 // app.use(cors());
-// app.use(cors({credentials: true, origin: true}));
-app.use(cors(), { credentials: true});
 
 // Middleware to handle static files
 app.use(express.static(path.join(__dirname, "/public")));
@@ -61,6 +59,7 @@ app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
 app.use("/story", require("./routes/api/stories"));
 app.use("/profile", require("./routes/api/profiles"));
+app.use("/comment", require("./routes/api/comments"));
 
 // handle 404
 app.all("*", (req, res) => {
