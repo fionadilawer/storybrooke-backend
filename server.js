@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // handle credentials
-app.use(credentials);
+// app.use(credentials);
 
 // Middleware to handle cors - cross origin resource sharing
 // app.use(cors({credentials: true, origin: corsOptions}));
