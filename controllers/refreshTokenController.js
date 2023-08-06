@@ -29,6 +29,7 @@ const handleRefreshToken = async (req, res) => {
     // send new jwt
     res.json({ roles, accessToken });
     console.log("new access token sent")
+    console.log(accessToken)
   });
 };
 
