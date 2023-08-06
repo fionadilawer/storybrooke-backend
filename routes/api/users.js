@@ -4,16 +4,16 @@ const ROLES_LIST = require("../../config/rolesList");
 const usersController = require("../../controllers/usersController");
 const verifyRoles = require("../../middleware/verifyRoles");
 
-router.route("/:id").get(usersController.getUser);
 router
   .route("/")
-  .get(usersController.getAllUsers)
+  // .get(usersController.getAllUsers)
   .put(
     verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
     usersController.updateUser
   );
+router.route("/all").get(usersController.getAllUsers);
 
-// router.route("/:id").get(usersController.getUser);
+router.route("/:id").get(usersController.getUser);
 router.route("/:username").delete(usersController.deleteUser);
 
 module.exports = router;
