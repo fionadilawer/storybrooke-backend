@@ -4,9 +4,9 @@ const app = express();
 const path = require("path");
 const cors = require("cors");
 const mongoose = require("mongoose");
-var bodyParser = require("body-parser");
+var bodyParser = require('body-parser');
 const errorHandler = require("./middleware/errorHandler");
-// const corsOptions = require("./config/corsOptions");
+const corsOptions = require("./config/corsOptions");
 const verifyJWT = require("./middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
@@ -19,14 +19,8 @@ connectDB();
 // body parser
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(bodyParser.json());
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(
-  bodyParser.urlencoded({
-    limit: "50mb",
-    extended: true,
-    parameterLimit: 50000,
-  })
-);
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
 // custom middleware
 app.use((req, res, next) => {
@@ -46,7 +40,7 @@ app.use(cookieParser());
 app.use(credentials);
 
 // Middleware to handle cors - cross origin resource sharing
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({credentials: true, origin: corsOptions}));
 // app.use(cors());
 
 // Middleware to handle static files
