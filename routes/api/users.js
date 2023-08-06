@@ -4,6 +4,7 @@ const ROLES_LIST = require("../../config/rolesList");
 const usersController = require("../../controllers/usersController");
 const verifyRoles = require("../../middleware/verifyRoles");
 
+router.route("/:id").get(usersController.getUser);
 router
   .route("/")
   .get(usersController.getAllUsers)
@@ -12,7 +13,7 @@ router
     usersController.updateUser
   );
 
-router.route("/:id").get(usersController.getUser);
+// router.route("/:id").get(usersController.getUser);
 router.route("/:username").delete(usersController.deleteUser);
 
 module.exports = router;
