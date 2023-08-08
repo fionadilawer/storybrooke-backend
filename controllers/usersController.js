@@ -93,9 +93,24 @@ const getUser = async (req, res) => {
   res.json(user);
 };
 
+// GET USER INTERESTS
+const getUserInterests = async (req, res) => {
+  if (!req?.params?.id)
+    return res.status(400).json({ message: "User ID required." });
+
+  const user = await User.findOne({ _id: req.params.id }).exec();
+  if (!user) {
+    return res
+      .status(204)
+      .json({ message: `No user matches ID ${req.params.id}.` });
+  }
+  res.json(user.interests);
+};
+
 module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
   getUser,
+  getUserInterests,
 };
