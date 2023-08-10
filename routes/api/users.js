@@ -13,6 +13,7 @@ router
   );
 
 router.route("/:id").get(usersController.getUser);
+router.route("/interests/:username").get(usersController.getUserInterests);
 router.route("/:username").delete(usersController.deleteUser);
 
 module.exports = router;
