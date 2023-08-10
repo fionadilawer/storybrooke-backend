@@ -95,15 +95,21 @@ const getUser = async (req, res) => {
 
 // GET USER INTERESTS
 const getUserInterests = async (req, res) => {
-  if (!req?.params?.id)
-    return res.status(400).json({ message: "User ID required." });
-
-  const user = await User.findOne({ _id: req.params.id }).exec();
+  // capitalize username
+  req.params.username =
+    req.params.username.charAt(0).toUpperCase() +
+    req.params.username.slice(1).toLowerCase();
+  // Check for username
+  if (!req?.params?.username)
+    return res.status(400).json({ message: "User name required." });
+  // Find user
+  const user = await User.findOne({ username: req.params.username }).exec();
   if (!user) {
     return res
       .status(204)
-      .json({ message: `No user matches ID ${req.params.id}.` });
+      .json({ message: `No user matches name ${req.params.username}.` });
   }
+  // Return user's interests
   res.json(user.interests);
 };
 
