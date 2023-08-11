@@ -12,7 +12,9 @@ const handleLogin = async (req, res) => {
       .status(400)
       .json({ message: "Username and password are required" });
   // check if user exists
-  const foundUser = await User.findOne({ username: user.charAt(0).toUpperCase() + user.slice(1).toLowerCase()}).exec();
+  const foundUser = await User.findOne({
+    username: user.charAt(0).toUpperCase() + user.slice(1).toLowerCase(),
+  }).exec();
 
   if (!foundUser) return res.sendStatus(404); // not found
   // check if password is correct
@@ -40,7 +42,6 @@ const handleLogin = async (req, res) => {
     // save refresh token with user in db
     foundUser.refreshToken = refreshToken;
     const result = await foundUser.save();
-    // console.log(result);
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -49,7 +50,6 @@ const handleLogin = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
     res.json({ roles, interests, accessToken });
-    console.log(accessToken);
   } else {
     res.sendStatus(401); // unauthorized
   }
