@@ -14,4 +14,8 @@ router
   // Delete a comment by id
   .delete(commentsController.deleteComment);
 
+  // Update a comment by id
+router
+  .route("/edit/:id").put(commentsController.updateComment);
+
 module.exports = router;
