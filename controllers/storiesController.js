@@ -295,18 +295,6 @@ const updateStory = async (req, res) => {
     });
   }
 
-  // check if story exists in any genre in db
-  // const story = await Genre.findOne({
-  //   stories: { $elemMatch: { _id: req?.params?.id } },
-  // }).exec();
-
-  // // if story doesn't exist
-  // if (!story) {
-  //   return res.status(404).json({
-  //     message: `Story ${newTitle} not found in the database.`,
-  //   });
-  // }
-
   // check if story exists
   const story = await Story.findOne({
     _id: req?.params?.id,
