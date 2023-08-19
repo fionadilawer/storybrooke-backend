@@ -1,21 +1,4 @@
 {
-    "headers": [
-        {
-          "source": "/",
-          "has": [
-            {
-              "type": "host",
-              "value": "https://imagine-tellmeastory.vercel.app"
-            }
-          ],
-          "headers" : [
-            {
-              "key" : "X-Robots-Tag",
-              "value" : "noindex"
-            }
-          ]
-        }
-      ],
     "version": 2,
     "builds": [
         {
