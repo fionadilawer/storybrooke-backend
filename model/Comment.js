@@ -15,6 +15,9 @@ const CommentSchema = new Schema({
     default: new Date(),
     required: true,
   },
+  reply: {
+    type: [this],
+  },
 });
 
 module.exports = mongoose.model("Comment", CommentSchema);
