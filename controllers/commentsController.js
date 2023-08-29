@@ -147,6 +147,84 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// UPDATE A COMMENT
+const updateComment = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  // check if no commenter and body
+  if (!req.body.commenter || !req.body.body) {
+    res.status(400).json({ message: "Both commenter and body are required" });
+    return;
+  }
+
+  //   get comment id from params
+  const commentId = req?.params?.id;
+
+  // check if comment exists in db
+  const comment = await Comment.findOne({ _id: commentId });
+
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  // new comment
+  const newComment = {
+    _id: commentId,
+    commenter:
+      req.body.commenter.charAt(0).toUpperCase() +
+      req.body.commenter.slice(1).toLowerCase(),
+    body: req.body.body,
+    date: new Date(),
+  };
+
+  // check if commenter is a user
+  if (!(await User.findOne({ username: newComment.commenter }))) {
+    res.status(404).json({
+      message:
+        "You have to be a registered user to comment on stories. Please sign up/sign in.",
+    });
+    return;
+  }
+
+  // check if commenter isn't the owner of the comment
+  if (comment.commenter !== newComment.commenter) {
+    res.status(400).json({ message: "You can't edit someone else's comment" });
+    return;
+  }
+  // update comment
+  try {
+    await Comment.updateOne({ _id: commentId }, newComment);
+
+    // update in story
+    await Story.updateOne(
+      { comments: { $elemMatch: { _id: commentId } } },
+      { $set: { "comments.$": newComment } }
+    ).exec();
+
+    // update in genres
+    await Genre.updateMany(
+      { "stories.comments": { $elemMatch: { _id: commentId } } },
+      { $set: { "stories.$.comments": newComment } }
+    ).exec();
+
+    // update in the story in users collection
+    await User.updateMany(
+      { "stories.comments": { $elemMatch: { _id: commentId } } },
+      { $set: { "stories.$.comments": newComment } }
+    ).exec();
+
+    // send response
+    res.status(200).json({ message: "Comment updated" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 // CREATE COMMENT REPLY
 const createCommentReply = async (req, res) => {
   // check if no params
@@ -230,5 +308,6 @@ module.exports = {
   createComment,
   getComments,
   deleteComment,
+  updateComment,
   createCommentReply,
 };
