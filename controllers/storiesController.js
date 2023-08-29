@@ -267,7 +267,6 @@ const getStoriesByAuthor = async (req, res) => {
 };
 
 //  UPDATE STORY GLOBALLY
-
 const updateStory = async (req, res) => {
   // check if params are empty
   if (!req?.params?.id)
@@ -294,18 +293,6 @@ const updateStory = async (req, res) => {
       message: `Author ${req.body.author} not found.`,
     });
   }
-
-  // check if story exists in any genre in db
-  // const story = await Genre.findOne({
-  //   stories: { $elemMatch: { _id: req?.params?.id } },
-  // }).exec();
-
-  // // if story doesn't exist
-  // if (!story) {
-  //   return res.status(404).json({
-  //     message: `Story ${newTitle} not found in the database.`,
-  //   });
-  // }
 
   // check if story exists
   const story = await Story.findOne({
@@ -365,20 +352,6 @@ const updateStory = async (req, res) => {
       continue;
     }
   }
-
-  // check if any of the remaining genres already have the story title
-  // const storyExists = await Genre.findOne({
-  //   genre: newStory.genres[i],
-  //   stories: {
-  //     $elemMatch: { title: newStory.newTitle, author: newStory.author },
-  //   },
-  // }).exec();
-
-  // if (storyExists) {
-  //   newStory.genres.splice(i, 1);
-  //   i--;
-  //   continue;
-  // }
 
   // check if story title exists in the genre
   for (let i = 0; i < newStory.genres.length; i++) {
@@ -443,14 +416,11 @@ const updateStory = async (req, res) => {
   ).exec();
 
   res.status(200).json({
-    // display new story
-    // message: `Story ${req.body.title} successfully updated in genres ${req.body.genres}.`,
-    message: `The story ${newTitle} has been successfully published in genres ${req.body.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
+    message: `The story ${newTitle} has been successfully updated in genres ${req.body.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
   });
 };
 
 // GET ALL STORIES GLOBALLY
-
 const getAllStoriesGlobal = async (req, res) => {
   const stories = await Story.find().exec();
 
