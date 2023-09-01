@@ -12,10 +12,15 @@ router
   .get(commentsController.getComments)
 
   // Delete a comment by id
-  .delete(commentsController.deleteComment);
+  .delete(commentsController.deleteComment)
+
+  // create a reply
+  .put(commentsController.createCommentReply);
 
   // Update a comment by id
 router
   .route("/edit/:id").put(commentsController.updateComment);
+
+
 
 module.exports = router;

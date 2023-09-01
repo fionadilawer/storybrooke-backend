@@ -225,9 +225,104 @@ const updateComment = async (req, res) => {
   }
 };
 
+// CREATE COMMENT REPLY
+const createCommentReply = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  let commentID = req?.params?.id;
+
+  //   check if comment id is valid
+  const comment = await Comment.findOne({ _id: commentID });
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  // check if no commenter or body
+  if (!req.body.commenter || !req.body.body) {
+    res.status(400).json({ message: "Both commenter and body are required" });
+    return;
+  }
+
+  // new comment
+  const reply = new Comment({
+    commenter:
+      req.body.commenter.charAt(0).toUpperCase() +
+      req.body.commenter.slice(1).toLowerCase(),
+    body: req.body.body,
+    date: new Date(),
+  });
+
+  // check if commenter is a user
+  const user = await User.findOne({ username: reply.commenter });
+  if (!user) {
+    res.status(404).json({
+      message:
+        "You have to be a registered user to comment on stories. Please sign up/sign in.",
+    });
+    return;
+  }
+
+  try {
+    //  save reply in comment
+    comment.reply.push(reply);
+    await comment.save();
+
+    // add reply to story
+    await Story.updateOne(
+      { comments: { $elemMatch: { _id: commentID } } },
+      { $push: { "comments.$.reply": reply } }
+    ).exec();
+
+    // update the stories in the genre
+    const stories = await Genre.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
+
+    stories.forEach(async (genre) => {
+      const story = genre.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.push(reply);
+      await genre.save();
+    });
+
+    // update the stories in the user
+    const userStories = await User.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
+
+    userStories.forEach(async (user) => {
+      const story = user.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.push(reply);
+      await user.save();
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+
+  res.status(201).json({
+    reply: reply,
+    message: "Response added successfully!",
+  });
+};
+
 module.exports = {
   createComment,
   getComments,
   deleteComment,
   updateComment,
+  createCommentReply,
 };
