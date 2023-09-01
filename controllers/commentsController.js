@@ -313,7 +313,10 @@ const createCommentReply = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 
-  res.status(201).json(reply);
+  res.status(201).json({
+    reply: reply,
+    message: "Response added successfully!",
+  });
 };
 
 module.exports = {
