@@ -278,25 +278,37 @@ const createCommentReply = async (req, res) => {
       { $push: { "comments.$.reply": reply } }
     ).exec();
 
-    // find the story in genres and add update the comment with reply
-    await Genre.updateMany(
-      {
-        stories: {
-          $elemMatch: { comments: { $elemMatch: { _id: commentID } } },
-        },
-      },
-      { $push: { "stories.$.comments.$.reply": reply } }
-    ).exec();
+    // update the stories in the genre
+    const stories = await Genre.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
 
-    // add reply to user stories
-    await User.updateOne(
-      {
-        stories: {
-          $elemMatch: { comments: { $elemMatch: { _id: commentID } } },
-        },
-      },
-      { $push: { "stories.$.comments.$.reply": reply } }
-    ).exec();
+    stories.forEach(async (genre) => {
+      const story = genre.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.push(reply);
+      await genre.save();
+    });
+
+    // update the stories in the user
+    const userStories = await User.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
+
+    userStories.forEach(async (user) => {
+      const story = user.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.push(reply);
+      await user.save();
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
