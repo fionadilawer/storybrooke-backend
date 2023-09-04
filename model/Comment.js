@@ -11,7 +11,7 @@ const CommentSchema = new Schema({
     required: true,
   },
   date: {
-    type: Date,
+    type: String,
     default: new Date().toLocaleDateString(),
     required: true,
   },
