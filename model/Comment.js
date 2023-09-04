@@ -12,9 +12,14 @@ const CommentSchema = new Schema({
   },
   date: {
     type: Date,
-    default: new Date(),
+    default: new Date().toLocaleDateString(),
     required: true,
   },
+  time: {
+    type: String,
+    default: new Date().toLocaleTimeString(),
+    required: true,
+  }
 });
 
 module.exports = mongoose.model("Comment", CommentSchema);
