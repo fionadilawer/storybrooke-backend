@@ -20,11 +20,19 @@ const createComment = async (req, res) => {
     res.status(404).json({ message: "Story not found" });
     return;
   }
-  
+
+  let dateObj = new Date();
+  let options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
   const commenter =
     req.body.commenter.charAt(0).toUpperCase() +
     req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
+  const date = dateObj.toLocaleDateString(undefined, options);
 
   //  check if no commenter or body
   if (!commenter || !body) {
@@ -46,6 +54,7 @@ const createComment = async (req, res) => {
   const newComment = new Comment({
     commenter,
     body,
+    date,
   });
 
   //   save comment
@@ -71,12 +80,10 @@ const createComment = async (req, res) => {
     ).exec();
 
     //  send response
-    res.status(201).json(
-      {
-        comment: newComment,
-        message: "Comment added successfully!",
-      }
-    );
+    res.status(201).json({
+      comment: newComment,
+      message: "Comment added successfully!",
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -175,6 +182,13 @@ const updateComment = async (req, res) => {
     return;
   }
 
+  let dateObj = new Date();
+  let options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
   // new comment
   const newComment = {
     _id: commentId,
@@ -182,6 +196,7 @@ const updateComment = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
+    date: dateObj.toLocaleDateString(undefined, options),
   };
 
   // check if commenter is a user
@@ -250,12 +265,20 @@ const createCommentReply = async (req, res) => {
     return;
   }
 
+  let dateObj = new Date();
+  let options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
   // new comment
   const reply = new Comment({
     commenter:
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
+    date: dateObj.toLocaleDateString(undefined, options),
   });
 
   // check if commenter is a user
