@@ -20,12 +20,11 @@ const createComment = async (req, res) => {
     res.status(404).json({ message: "Story not found" });
     return;
   }
-
+  
   const commenter =
     req.body.commenter.charAt(0).toUpperCase() +
     req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
-  // const date = new Date().toLocaleDateString();
 
   //  check if no commenter or body
   if (!commenter || !body) {
@@ -45,9 +44,8 @@ const createComment = async (req, res) => {
 
   //   create new comment
   const newComment = new Comment({
-    commenter: commenter,
-    body: body,
-    // date: date,
+    commenter,
+    body,
   });
 
   //   save comment
@@ -73,7 +71,12 @@ const createComment = async (req, res) => {
     ).exec();
 
     //  send response
-    res.status(201).json(newComment);
+    res.status(201).json(
+      {
+        comment: newComment,
+        message: "Comment added successfully!",
+      }
+    );
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -179,7 +182,6 @@ const updateComment = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    // date: new Date(),
   };
 
   // check if commenter is a user
@@ -254,7 +256,6 @@ const createCommentReply = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    date: new Date(),
   });
 
   // check if commenter is a user
