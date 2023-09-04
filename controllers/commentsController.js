@@ -25,7 +25,7 @@ const createComment = async (req, res) => {
     req.body.commenter.charAt(0).toUpperCase() +
     req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
-  const date = new Date();
+  // const date = new Date().toLocaleDateString();
 
   //  check if no commenter or body
   if (!commenter || !body) {
@@ -47,7 +47,7 @@ const createComment = async (req, res) => {
   const newComment = new Comment({
     commenter: commenter,
     body: body,
-    date: date,
+    // date: date,
   });
 
   //   save comment
@@ -179,7 +179,7 @@ const updateComment = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    date: new Date(),
+    // date: new Date(),
   };
 
   // check if commenter is a user
