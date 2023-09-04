@@ -15,11 +15,6 @@ const CommentSchema = new Schema({
     default: new Date().toLocaleDateString(),
     required: true,
   },
-  time: {
-    type: String,
-    default: new Date().toLocaleTimeString(),
-    required: true,
-  }
 });
 
 module.exports = mongoose.model("Comment", CommentSchema);
