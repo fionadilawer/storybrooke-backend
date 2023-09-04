@@ -272,13 +272,15 @@ const createCommentReply = async (req, res) => {
     day: "numeric",
   };
 
+  const date = dateObj.toLocaleDateString(undefined, options);
+
   // new comment
   const reply = new Comment({
     commenter:
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    date: dateObj.toLocaleDateString(undefined, options),
+    date: date,
   });
 
   // check if commenter is a user
@@ -343,10 +345,83 @@ const createCommentReply = async (req, res) => {
   });
 };
 
+// DELETE COMMENT REPLY
+const deleteReply = async (req, res) => {
+  //  check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No reply id provided" });
+    return;
+  }
+
+  //   get reply id from params
+  const replyId = req?.params?.id;
+
+  //   check if the reply can be found in any of the comments
+  const reply = await Comment.findOne({ "reply._id": replyId });
+  
+
+  if (!reply) {
+    res.status(404).json({ message: "Reply not found" });
+    return;
+  }
+
+  //   delete reply
+  try {
+    await Comment.updateOne(
+      { reply: { $elemMatch: { _id: replyId } } },
+      { $pull: { reply: { _id: replyId } } }
+    ).exec();
+
+    // delete reply from story
+    await Story.updateOne(
+      { comments: { $elemMatch: { reply: { $elemMatch: { _id: replyId } } } } },
+      { $pull: { "comments.$.reply": { _id: replyId } } }
+    ).exec();
+
+    // delete reply from genre
+    const stories = await Genre.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
+
+    stories.forEach(async (genre) => {
+      const story = genre.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.pull({ _id: replyId });
+      await genre.save();
+    });
+
+    // delete reply from user
+    const userStories = await User.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    });
+
+    userStories.forEach(async (user) => {
+      const story = user.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentID)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentID
+      );
+      comment.reply.pull({ _id: replyId });
+      await user.save();
+    });
+
+    // send response
+    res.status(200).json({ message: "Reply deleted" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createComment,
   getComments,
   deleteComment,
   updateComment,
   createCommentReply,
+  deleteReply,
 };
