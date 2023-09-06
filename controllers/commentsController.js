@@ -73,11 +73,11 @@ const createComment = async (req, res) => {
       { $push: { "stories.$.comments": newComment } }
     ).exec();
 
-    // add comment to user stories
-    await User.updateOne(
-      { stories: { $elemMatch: { _id: storyId } } },
-      { $push: { "stories.$.comments": newComment } }
-    ).exec();
+    // // add comment to user stories
+    // await User.updateOne(
+    //   { stories: { $elemMatch: { _id: storyId } } },
+    //   { $push: { "stories.$.comments": newComment } }
+    // ).exec();
 
     //  send response
     res.status(201).json({
@@ -146,10 +146,10 @@ const deleteComment = async (req, res) => {
       { $pull: { "stories.$.comments": { _id: commentId } } }
     ).exec();
 
-    await User.updateMany(
-      { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $pull: { "stories.$.comments": { _id: commentId } } }
-    ).exec();
+    // await User.updateMany(
+    //   { "stories.comments": { $elemMatch: { _id: commentId } } },
+    //   { $pull: { "stories.$.comments": { _id: commentId } } }
+    // ).exec();
 
     res.status(200).json({ message: "Comment deleted" });
   } catch (err) {
@@ -230,10 +230,10 @@ const updateComment = async (req, res) => {
     ).exec();
 
     // update in the story in users collection
-    await User.updateMany(
-      { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $set: { "stories.$.comments": newComment } }
-    ).exec();
+    // await User.updateMany(
+    //   { "stories.comments": { $elemMatch: { _id: commentId } } },
+    //   { $set: { "stories.$.comments": newComment } }
+    // ).exec();
 
     // send response
     res.status(200).json({ message: "Comment updated" });
@@ -321,20 +321,22 @@ const createCommentReply = async (req, res) => {
     });
 
     // update the stories in the user
-    const userStories = await User.find({
-      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
-    });
+    // const userStories = await User.find({
+    //   stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    // });
 
-    userStories.forEach(async (user) => {
-      const story = user.stories.find((story) =>
-        story.comments.find((comment) => comment._id == commentID)
-      );
-      const comment = story.comments.find(
-        (comment) => comment._id == commentID
-      );
-      comment.reply.push(reply);
-      await user.save();
-    });
+    // userStories.forEach(async (user) => {
+    //   const story = user.stories.find((story) =>
+    //     story.comments.find((comment) => comment._id == commentID)
+    //   );
+    //   const comment = story.comments.find(
+    //     (comment) => comment._id == commentID
+    //   );
+    //   comment.reply.push(reply);
+    //   await user.save();
+
+
+    // });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -411,22 +413,22 @@ const deleteReply = async (req, res) => {
     });
 
     // // delete reply from user
-    const userStories = await User.find({
-      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentId } } } },
-    });
+    // const userStories = await User.find({
+    //   stories: { $elemMatch: { comments: { $elemMatch: { _id: commentId } } } },
+    // });
 
-    userStories.forEach(async (user) => {
-      const story = user.stories.find((story) =>
-        story.comments.find((comment) => comment._id == commentId)
-      );
-      const comment = story.comments.find(
-        (comment) => comment._id == commentId
-      );
-      comment.reply = comment.reply.filter(
-        (reply) => reply._id != req.body.replyId
-      );
-      await user.save();
-    });
+    // userStories.forEach(async (user) => {
+    //   const story = user.stories.find((story) =>
+    //     story.comments.find((comment) => comment._id == commentId)
+    //   );
+    //   const comment = story.comments.find(
+    //     (comment) => comment._id == commentId
+    //   );
+    //   comment.reply = comment.reply.filter(
+    //     (reply) => reply._id != req.body.replyId
+    //   );
+    //   await user.save();
+    // });
 
     res.status(200).json({ message: "Reply deleted" });
   } catch (err) {
