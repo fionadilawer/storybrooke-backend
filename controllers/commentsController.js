@@ -335,7 +335,6 @@ const createCommentReply = async (req, res) => {
     //   comment.reply.push(reply);
     //   await user.save();
 
-
     // });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -436,6 +435,30 @@ const deleteReply = async (req, res) => {
   }
 };
 
+// GET ALL REPLIES FOR A COMMENT
+const getReplies = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  // check if comment exists
+  const comment = await Comment.findOne({ _id: req.params.id });
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  // get replies
+  try {
+    const replies = comment.reply;
+    res.status(200).json(replies);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createComment,
   getComments,
@@ -443,4 +466,5 @@ module.exports = {
   updateComment,
   createCommentReply,
   deleteReply,
+  getReplies,
 };
