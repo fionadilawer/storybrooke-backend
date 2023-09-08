@@ -23,4 +23,7 @@ router.route("/edit/:id").put(commentsController.updateComment);
 // delete a reply by id
 router.route("/reply/:id").delete(commentsController.deleteReply);
 
+// get replies
+router.route("/reply/:id").get(commentsController.getReplies);
+
 module.exports = router;
