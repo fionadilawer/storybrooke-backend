@@ -24,6 +24,6 @@ router.route("/edit/:id").put(commentsController.updateComment);
 router.route("/reply/:id").delete(commentsController.deleteReply);
 
 // get replies
-router.route("/reply/:id").get(commentsController.getReplies);
+router.route("/replies/:id").get(commentsController.getReplies);
 
 module.exports = router;
