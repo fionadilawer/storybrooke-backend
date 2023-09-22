@@ -265,16 +265,9 @@ const createCommentReply = async (req, res) => {
     return;
   }
 
-  let dateObj = new Date();
-  let options = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
-
-  const date = dateObj.toLocaleDateString(undefined, options);
-
   // new comment
+  const date = new Date();
+  
   const reply = new Comment({
     commenter:
       req.body.commenter.charAt(0).toUpperCase() +
