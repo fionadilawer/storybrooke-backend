@@ -196,7 +196,9 @@ const updateComment = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
+    reply: comment.reply,
     date: dateObj.toLocaleDateString(undefined, options),
+    time: dateObj.toLocaleTimeString(),
   };
 
   // check if commenter is a user
@@ -226,14 +228,14 @@ const updateComment = async (req, res) => {
     // update in genres
     await Genre.updateMany(
       { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $set: { "stories.$.comments": newComment } }
+      { $set: { "stories.$[story].comments.$[comment]": newComment } },
+      {
+        arrayFilters: [
+          { "story.comments._id": commentId },
+          { "comment._id": commentId },
+        ],
+      }
     ).exec();
-
-    // update in the story in users collection
-    // await User.updateMany(
-    //   { "stories.comments": { $elemMatch: { _id: commentId } } },
-    //   { $set: { "stories.$.comments": newComment } }
-    // ).exec();
 
     // send response
     res.status(200).json({ message: "Comment updated" });
@@ -267,7 +269,7 @@ const createCommentReply = async (req, res) => {
 
   // new comment
   const date = new Date();
-  
+
   const reply = new Comment({
     commenter:
       req.body.commenter.charAt(0).toUpperCase() +
