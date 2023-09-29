@@ -33,6 +33,7 @@ const createComment = async (req, res) => {
     req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
   const date = dateObj.toLocaleDateString(undefined, options);
+  const time = dateObj.toLocaleTimeString();
 
   //  check if no commenter or body
   if (!commenter || !body) {
@@ -55,6 +56,7 @@ const createComment = async (req, res) => {
     commenter,
     body,
     date,
+    time,
   });
 
   //   save comment
