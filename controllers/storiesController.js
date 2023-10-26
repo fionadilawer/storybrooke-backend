@@ -97,15 +97,15 @@ const createStory = async (req, res) => {
   const newStory = new Story(story);
   await newStory.save();
 
-  // push story to user's collection, stories array
-  const user = await User.findOne({
-    username: req.body.author,
-  }).exec();
+  // // push story to user's collection, stories array
+  // const user = await User.findOne({
+  //   username: req.body.author,
+  // }).exec();
 
-  if (user) {
-    user.stories.push(newStory);
-    await user.save();
-  }
+  // if (user) {
+  //   user.stories.push(newStory);
+  //   await user.save();
+  // }
 
   // push genre collection
   for (let i = 0; i < story.genres.length; i++) {
@@ -401,19 +401,19 @@ const updateStory = async (req, res) => {
     }
   ).exec();
 
-  // update story in user's stories
-  const resultInUser = await User.updateMany(
-    { stories: { $elemMatch: { _id: req?.params?.id } } },
-    {
-      $set: {
-        "stories.$.title": newStory.title ? newStory.title : story.title,
-        "stories.$.author": newStory.author ? newStory.author : story.author,
-        "stories.$.body": newStory.body ? newStory.body : story.body,
-        "stories.$.genres": newStory.genres ? newStory.genres : story.genres,
-        "stories.$.date": new Date(),
-      },
-    }
-  ).exec();
+  // // update story in user's stories
+  // const resultInUser = await User.updateMany(
+  //   { stories: { $elemMatch: { _id: req?.params?.id } } },
+  //   {
+  //     $set: {
+  //       "stories.$.title": newStory.title ? newStory.title : story.title,
+  //       "stories.$.author": newStory.author ? newStory.author : story.author,
+  //       "stories.$.body": newStory.body ? newStory.body : story.body,
+  //       "stories.$.genres": newStory.genres ? newStory.genres : story.genres,
+  //       "stories.$.date": new Date(),
+  //     },
+  //   }
+  // ).exec();
 
   res.status(200).json({
     message: `The story ${newTitle} has been successfully updated in genres ${req.body.genres}. Note: If any of the specified genres are missing, it is because the story's title already exists in that genre.`,
@@ -467,11 +467,11 @@ const deleteStory = async (req, res) => {
     _id: req?.params?.id,
   }).exec();
 
-  // delete story from the user's stories
-  const result2 = await User.updateMany(
-    {},
-    { $pull: { stories: { _id: req?.params?.id } } }
-  ).exec();
+  // // delete story from the user's stories
+  // const result2 = await User.updateMany(
+  //   {},
+  //   { $pull: { stories: { _id: req?.params?.id } } }
+  // ).exec();
 
   // delete story from all genres
   const result3 = await Genre.updateMany(

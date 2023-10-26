@@ -21,11 +21,19 @@ const createComment = async (req, res) => {
     return;
   }
 
+  let dateObj = new Date();
+  let options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
   const commenter =
     req.body.commenter.charAt(0).toUpperCase() +
     req.body.commenter.slice(1).toLowerCase();
   const body = req.body.body;
-  const date = new Date();
+  const date = dateObj.toLocaleDateString(undefined, options);
+  const time = dateObj.toLocaleTimeString();
 
   //  check if no commenter or body
   if (!commenter || !body) {
@@ -45,9 +53,10 @@ const createComment = async (req, res) => {
 
   //   create new comment
   const newComment = new Comment({
-    commenter: commenter,
-    body: body,
-    date: date,
+    commenter,
+    body,
+    date,
+    time,
   });
 
   //   save comment
@@ -66,14 +75,17 @@ const createComment = async (req, res) => {
       { $push: { "stories.$.comments": newComment } }
     ).exec();
 
-    // add comment to user stories
-    await User.updateOne(
-      { stories: { $elemMatch: { _id: storyId } } },
-      { $push: { "stories.$.comments": newComment } }
-    ).exec();
+    // // add comment to user stories
+    // await User.updateOne(
+    //   { stories: { $elemMatch: { _id: storyId } } },
+    //   { $push: { "stories.$.comments": newComment } }
+    // ).exec();
 
     //  send response
-    res.status(201).json(newComment);
+    res.status(201).json({
+      comment: newComment,
+      message: "Comment added successfully!",
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -136,10 +148,10 @@ const deleteComment = async (req, res) => {
       { $pull: { "stories.$.comments": { _id: commentId } } }
     ).exec();
 
-    await User.updateMany(
-      { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $pull: { "stories.$.comments": { _id: commentId } } }
-    ).exec();
+    // await User.updateMany(
+    //   { "stories.comments": { $elemMatch: { _id: commentId } } },
+    //   { $pull: { "stories.$.comments": { _id: commentId } } }
+    // ).exec();
 
     res.status(200).json({ message: "Comment deleted" });
   } catch (err) {
@@ -172,6 +184,13 @@ const updateComment = async (req, res) => {
     return;
   }
 
+  let dateObj = new Date();
+  let options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
   // new comment
   const newComment = {
     _id: commentId,
@@ -179,7 +198,9 @@ const updateComment = async (req, res) => {
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    date: new Date(),
+    reply: comment.reply,
+    date: dateObj.toLocaleDateString(undefined, options),
+    time: dateObj.toLocaleTimeString(),
   };
 
   // check if commenter is a user
@@ -209,13 +230,13 @@ const updateComment = async (req, res) => {
     // update in genres
     await Genre.updateMany(
       { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $set: { "stories.$.comments": newComment } }
-    ).exec();
-
-    // update in the story in users collection
-    await User.updateMany(
-      { "stories.comments": { $elemMatch: { _id: commentId } } },
-      { $set: { "stories.$.comments": newComment } }
+      { $set: { "stories.$[story].comments.$[comment]": newComment } },
+      {
+        arrayFilters: [
+          { "story.comments._id": commentId },
+          { "comment._id": commentId },
+        ],
+      }
     ).exec();
 
     // send response
@@ -249,12 +270,14 @@ const createCommentReply = async (req, res) => {
   }
 
   // new comment
+  const date = new Date();
+
   const reply = new Comment({
     commenter:
       req.body.commenter.charAt(0).toUpperCase() +
       req.body.commenter.slice(1).toLowerCase(),
     body: req.body.body,
-    date: new Date(),
+    date: date,
   });
 
   // check if commenter is a user
@@ -295,20 +318,21 @@ const createCommentReply = async (req, res) => {
     });
 
     // update the stories in the user
-    const userStories = await User.find({
-      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
-    });
+    // const userStories = await User.find({
+    //   stories: { $elemMatch: { comments: { $elemMatch: { _id: commentID } } } },
+    // });
 
-    userStories.forEach(async (user) => {
-      const story = user.stories.find((story) =>
-        story.comments.find((comment) => comment._id == commentID)
-      );
-      const comment = story.comments.find(
-        (comment) => comment._id == commentID
-      );
-      comment.reply.push(reply);
-      await user.save();
-    });
+    // userStories.forEach(async (user) => {
+    //   const story = user.stories.find((story) =>
+    //     story.comments.find((comment) => comment._id == commentID)
+    //   );
+    //   const comment = story.comments.find(
+    //     (comment) => comment._id == commentID
+    //   );
+    //   comment.reply.push(reply);
+    //   await user.save();
+
+    // });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -319,10 +343,125 @@ const createCommentReply = async (req, res) => {
   });
 };
 
+// DELETE REPLY
+const deleteReply = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  //   get comment id from params
+  const commentId = req?.params?.id;
+
+  //   check if comment id is valid
+  const comment = await Comment.findOne({ _id: commentId });
+
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  // check if the comment has a reply with the given id
+  const reply = comment.reply.find((reply) => reply._id == req.body.replyId);
+
+  if (!reply) {
+    res.status(404).json({ message: "Reply not found" });
+    return;
+  }
+
+  try {
+    // delete reply from comment
+    const comment = await Comment.findById(commentId).exec();
+    comment.reply = comment.reply.filter(
+      (reply) => reply._id != req.body.replyId
+    );
+    await comment.save();
+
+    // delete reply from story
+    const storyComment = await Story.findOne({
+      comments: { $elemMatch: { _id: commentId } },
+    }).exec();
+
+    storyComment.comments.forEach((comment) => {
+      comment.reply = comment.reply.filter(
+        (reply) => reply._id != req.body.replyId
+      );
+    });
+
+    await storyComment.save();
+
+    // delete reply from genre
+    const genreStories = await Genre.find({
+      stories: { $elemMatch: { comments: { $elemMatch: { _id: commentId } } } },
+    });
+    genreStories.forEach(async (genre) => {
+      const story = genre.stories.find((story) =>
+        story.comments.find((comment) => comment._id == commentId)
+      );
+      const comment = story.comments.find(
+        (comment) => comment._id == commentId
+      );
+      comment.reply = comment.reply.filter(
+        (reply) => reply._id != req.body.replyId
+      );
+      await genre.save();
+    });
+
+    // // delete reply from user
+    // const userStories = await User.find({
+    //   stories: { $elemMatch: { comments: { $elemMatch: { _id: commentId } } } },
+    // });
+
+    // userStories.forEach(async (user) => {
+    //   const story = user.stories.find((story) =>
+    //     story.comments.find((comment) => comment._id == commentId)
+    //   );
+    //   const comment = story.comments.find(
+    //     (comment) => comment._id == commentId
+    //   );
+    //   comment.reply = comment.reply.filter(
+    //     (reply) => reply._id != req.body.replyId
+    //   );
+    //   await user.save();
+    // });
+
+    res.status(200).json({ message: "Reply deleted" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// GET ALL REPLIES FOR A COMMENT
+const getReplies = async (req, res) => {
+  // check if no params
+  if (!req?.params?.id) {
+    res.status(400).json({ message: "No comment id provided" });
+    return;
+  }
+
+  // check if comment exists
+  const comment = await Comment.findOne({ _id: req.params.id });
+  if (!comment) {
+    res.status(404).json({ message: "Comment not found" });
+    return;
+  }
+
+  // get replies
+  try {
+    const replies = comment.reply;
+    res.status(200).json(replies);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createComment,
   getComments,
   deleteComment,
   updateComment,
   createCommentReply,
+  deleteReply,
+  getReplies,
 };

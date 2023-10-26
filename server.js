@@ -59,7 +59,7 @@ app.use("/", require("./routes/interest"));
 app.use("/genres", require("./routes/api/genres"));
 app.use("/story", require("./routes/api/stories"));
 app.use("/profile", require("./routes/api/profiles"));
-app.use("/comment", require("./routes/api/comments"));
+app.use("/comments", require("./routes/api/comments"));
 
 // handle 404
 app.all("*", (req, res) => {

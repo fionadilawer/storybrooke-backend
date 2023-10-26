@@ -28,10 +28,10 @@ const UserSchema = new Schema({
     type: Array,
     default: [],
   },
-  stories: {
-    type: [Story.schema],
-    default: [],
-  },
+  // stories: {
+  //   type: [Story.schema],
+  //   default: [],
+  // },
   profile: {
     type: Profile.schema,
     default: null,

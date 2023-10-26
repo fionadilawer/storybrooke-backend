@@ -17,10 +17,13 @@ router
   // create a reply
   .put(commentsController.createCommentReply);
 
-  // Update a comment by id
-router
-  .route("/edit/:id").put(commentsController.updateComment);
+// Update a comment by id
+router.route("/edit/:id").put(commentsController.updateComment);
 
+// delete a reply by id
+router.route("/reply/:id").delete(commentsController.deleteReply);
 
+// get replies
+router.route("/replies/:id").get(commentsController.getReplies);
 
 module.exports = router;
